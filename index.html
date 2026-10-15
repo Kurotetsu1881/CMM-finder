@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BAY1 Uçak Bakım Takip</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-6">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700">
+            <div>
+                <h1 class="text-2xl font-bold text-red-500 tracking-wide">CMM Erişim Ekranı</h1>
+                <p class="text-gray-400 text-sm mt-1">Google E-Tablo Veri ve Durum Paneli</p>
+            </div>
+            <div class="w-full md:w-72">
+                <input type="text" id="searchInput" placeholder="Tabloda ara..." class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-red-500 transition-colors">
+            </div>
+        </div>
+
+        <div id="loading" class="flex flex-col items-center justify-center py-20">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mb-4"></div>
+            <p class="text-gray-400 text-sm">Veriler yükleniyor, lütfen bekleyin...</p>
+        </div>
+
+        <div id="errorMessage" class="hidden bg-red-900/50 border border-red-500 text-red-200 px-6 py-4 rounded-xl flex items-center shadow-lg">
+            <svg class="w-6 h-6 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.667.192 3 1.732 3z"></path></svg>
+            <span id="errorText"></span>
+        </div>
+
+        <div id="tableContainer" class="hidden bg-gray-800 rounded-2xl border border-gray-700 shadow-xl overflow-hidden min-h-[400px]">
+            <div class="overflow-x-auto">
+                <table id="dataTable" class="w-full text-left border-collapse">
+                    <thead id="tableHead" class="bg-gray-900/80 text-gray-400 text-xs uppercase tracking-wider">
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-gray-700 text-sm text-gray-300">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-center mt-6 text-xs text-gray-500 px-2">
+            <span>Toplam Kayıt: <span id="rowCount" class="font-semibold text-red-500">0</span></span>
+            <button onclick="loadData()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors font-medium shadow-md">
+                Verileri Yenile
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxRrje_WpYAKIN6FvS676jOP9_b0cGl0S117RzHbPlcOhaGD7E9BbodPjL24AM8tM9c/exec";
+        let allData = [];
+        let headers = [];
+
+        async function loadData() {
+            const loading = document.getElementById('loading');
+            const tableContainer = document.getElementById('tableContainer');
+            const errorMessage = document.getElementById('errorMessage');
+
+            loading.classList.remove('hidden');
+            tableContainer.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+
+            try {
+                const response = await fetch(WEB_APP_URL);
+                if (!response.ok) throw new Error('Sunucudan veri alınamadı.');
+
+                const rawData = await response.json();
+
+                if (Array.isArray(rawData) && rawData.length > 0) {
+                    headers = rawData[0];
+                    allData = rawData.slice(1).map(row => {
+                        let obj = {};
+                        headers.forEach((h, i) => {
+                            obj[h] = row[i] !== undefined ? row[i] : '';
+                        });
+                        return obj;
+                    });
+
+                    renderTable(allData);
+                } else {
+                    throw new Error('Tabloda görüntülenecek veri bulunamadı.');
+                }
+            } catch (error) {
+                loading.classList.add('hidden');
+                errorMessage.classList.remove('hidden');
+                document.getElementById('errorText').textContent = "Hata: " + error.message;
+            }
+        }
+
+        function renderTable(data) {
+            const tHead = document.getElementById('tableHead');
+            const tBody = document.getElementById('tableBody');
+            const loading = document.getElementById('loading');
+            const tableContainer = document.getElementById('tableContainer');
+
+            // Sadece 4. sütunun (index 3) sağ boşluğu dar, diğerleri px-6
+            const padFor = (colIdx) => colIdx === 3 ? 'pl-6 pr-2 w-px' : 'px-6';
+
+            let headHtml = '<tr>';
+            headers.forEach((header, colIdx) => {
+                headHtml += `<th class="${padFor(colIdx)} py-4 font-semibold">${header}</th>`;
+            });
+            headHtml += '</tr>';
+            tHead.innerHTML = headHtml;
+
+            let bodyHtml = '';
+            data.forEach((row, index) => {
+                bodyHtml += `<tr class="hover:bg-gray-700/50 transition-colors ${index % 2 === 0 ? 'bg-gray-800/80' : 'bg-gray-800/100'}">`;
+                headers.forEach((header, colIdx) => {
+                    let cellValue = row[header] !== undefined ? row[header] : '';
+
+                    if (header.toLowerCase().includes('cmm') && cellValue) {
+                        bodyHtml += `<td class="${padFor(colIdx)} py-4 text-gray-300 whitespace-nowrap">
+                                        <a href="https://ttdocs.thyteknik.com/documents/?q:document_chapter:icontains=${cellValue}" target="_blank" class="text-red-500 hover:text-red-400 underline font-medium">
+                                            ${cellValue}
+                                        </a>
+                                     </td>`;
+                    } else {
+                        bodyHtml += `<td class="${padFor(colIdx)} py-4 text-gray-300 whitespace-nowrap">${cellValue}</td>`;
+                    }
+                });
+                bodyHtml += '</tr>';
+            });
+            tBody.innerHTML = bodyHtml;
+
+            document.getElementById('rowCount').textContent = data.length;
+
+            loading.classList.add('hidden');
+            tableContainer.classList.remove('hidden');
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allData.filter(row => {
+                return Object.values(row).some(val =>
+                    String(val).toLowerCase().includes(term)
+                );
+            });
+            renderTable(filtered);
+        });
+
+        loadData();
+    </script>
+</body>
+</html>
