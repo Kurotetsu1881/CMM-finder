@@ -12,12 +12,12 @@
 </head>
 <body class="bg-[url('background.jpg')] bg-cover bg-center bg-no-repeat bg-fixed text-gray-100 min-h-screen p-6 flex flex-col">
     <div class="max-w-7xl mx-auto w-full flex flex-col h-full"> 
-        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-gray-900/40 p-6 rounded-2xl shadow-xl border border-gray-700/30 backdrop-blur-md">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-gray-900/10 p-6 rounded-2xl shadow-xl border border-gray-700/5 backdrop-blur-sm">
             <div>
                 <h1 class="text-2xl font-bold text-red-500 tracking-wide">CMM Erişim Ekranı</h1>
             </div>
             <div class="w-full md:w-72">
-                <input type="text" id="searchInput" placeholder="Tabloda ara..." class="w-full bg-gray-900/80 border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-red-500 transition-colors">
+                <input type="text" id="searchInput" placeholder="Tabloda ara..." class="w-full bg-gray-950/40 border border-gray-700/30 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-red-500 transition-colors backdrop-blur-sm">
             </div>
         </div>
 
@@ -31,12 +31,12 @@
             <span id="errorText"></span>
         </div>
 
-        <div id="tableContainer" class="hidden flex flex-col flex-grow bg-gray-900/30 rounded-2xl border border-gray-700/30 shadow-xl overflow-hidden backdrop-blur-md min-h-[400px] max-h-[600px]">
+        <div id="tableContainer" class="hidden flex flex-col flex-grow bg-gray-950/10 rounded-2xl border border-gray-700/5 shadow-xl overflow-hidden backdrop-blur-sm min-h-[400px] max-h-[600px]">
             <div class="overflow-y-auto flex-grow">
                 <table id="dataTable" class="w-full text-left border-collapse">
-                    <thead id="tableHead" class="bg-gray-900 text-gray-300 text-xs uppercase tracking-wider sticky top-0 z-20 shadow-md">
+                    <thead id="tableHead" class="bg-gray-950 text-gray-300 text-xs uppercase tracking-wider sticky top-0 z-20 shadow-md">
                     </thead>
-                    <tbody id="tableBody" class="divide-y divide-gray-700/30 text-sm text-gray-300">
+                    <tbody id="tableBody" class="divide-y divide-gray-700/5 text-sm text-gray-300">
                     </tbody>
                 </table>
             </div>
@@ -44,8 +44,8 @@
 
         <div class="flex justify-between items-center mt-6 text-xs text-gray-400 px-2 mt-auto">
             <span>Toplam Kayıt: <span id="rowCount" class="font-semibold text-red-500">0</span></span>
-            <button onclick="refreshData()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors font-medium shadow-md">
-                Verileri Yenile
+            <button onclick="refreshData()" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded-md transition-colors font-medium shadow-sm text-[11px]">
+                Verileri Temizle
             </button>
         </div>
     </div>
@@ -111,6 +111,8 @@
 
         function refreshData() {
             localStorage.removeItem(CACHE_KEY);
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = '';
             fetchAndCacheData();
         }
 
@@ -142,7 +144,7 @@
 
             let bodyHtml = '';
             data.forEach((row, index) => {
-                bodyHtml += `<tr class="hover:bg-gray-800/60 transition-colors ${index % 2 === 0 ? 'bg-gray-950/20': 'bg-transparent'}">`;
+                bodyHtml += `<tr class="hover:bg-gray-800/20 transition-colors bg-transparent">`;
                 headers.forEach(header => {
                     let cellValue = row[header] !== undefined ? row[header] : '';
                     
