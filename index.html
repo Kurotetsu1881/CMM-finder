@@ -10,12 +10,11 @@
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen p-6">
+<body class="bg-[url('background.jpg')] bg-cover bg-center bg-no-repeat text-gray-100 min-h-screen p-6">
     <div class="max-w-7xl mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 bg-gray-800/80 p-6 rounded-2xl shadow-xl border border-gray-700 backdrop-blur-md">
             <div>
                 <h1 class="text-2xl font-bold text-red-500 tracking-wide">CMM Erişim Ekranı</h1>
-                <p class="text-gray-400 text-sm mt-1">Önbellekli GitHub CSV Veri Paneli</p>
             </div>
             <div class="w-full md:w-72">
                 <input type="text" id="searchInput" placeholder="Tabloda ara..." class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-red-500 transition-colors">
@@ -32,7 +31,7 @@
             <span id="errorText"></span>
         </div>
 
-        <div id="tableContainer" class="hidden bg-gray-800 rounded-2xl border border-gray-700 shadow-xl overflow-hidden min-h-[400px]">
+        <div id="tableContainer" class="hidden bg-gray-800/80 rounded-2xl border border-gray-700 shadow-xl overflow-hidden min-h-[400px] backdrop-blur-md">
             <div class="overflow-x-auto">
                 <table id="dataTable" class="w-full text-left border-collapse">
                     <thead id="tableHead" class="bg-gray-900/80 text-gray-400 text-xs uppercase tracking-wider">
@@ -134,7 +133,6 @@
             const loading = document.getElementById('loading');
             const tableContainer = document.getElementById('tableContainer');
 
-            // Sütun boşlukları daraltıldı (px-3)
             let headHtml = '<tr>';
             headers.forEach(header => {
                 headHtml += `<th class="px-3 py-4 font-semibold">${header}</th>`;
