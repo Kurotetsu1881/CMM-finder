@@ -15,7 +15,7 @@
         <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700">
             <div>
                 <h1 class="text-2xl font-bold text-red-500 tracking-wide">CMM Erişim Ekranı</h1>
-                <p class="text-gray-400 text-sm mt-1">Google E-Tablo Veri ve Durum Paneli</p>
+                <p class="text-gray-400 text-sm mt-1">Önbellekli GitHub CSV Veri Paneli</p>
             </div>
             <div class="w-full md:w-72">
                 <input type="text" id="searchInput" placeholder="Tabloda ara..." class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-red-500 transition-colors">
@@ -45,14 +45,15 @@
 
         <div class="flex justify-between items-center mt-6 text-xs text-gray-500 px-2">
             <span>Toplam Kayıt: <span id="rowCount" class="font-semibold text-red-500">0</span></span>
-            <button onclick="loadData()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors font-medium shadow-md">
+            <button onclick="refreshData()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors font-medium shadow-md">
                 Verileri Yenile
             </button>
         </div>
     </div>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxRrje_WpYAKIN6FvS676jOP9_b0cGl0S117RzHbPlcOhaGD7E9BbodPjL24AM8tM9c/exec";
+        const CSV_FILE_URL = "veri.csv";
+        const CACHE_KEY = "cmm_finder_data";
         let allData = [];
         let headers = [];
 
@@ -65,31 +66,66 @@
             tableContainer.classList.add('hidden');
             errorMessage.classList.add('hidden');
 
+            const cachedData = localStorage.getItem(CACHE_KEY);
+
+            if (cachedData) {
+                processData(cachedData);
+            } else {
+                fetchAndCacheData();
+            }
+        }
+
+        async function fetchAndCacheData() {
+            const loading = document.getElementById('loading');
             try {
-                const response = await fetch(WEB_APP_URL);
-                if (!response.ok) throw new Error('Sunucudan veri alınamadı.');
-
-                const rawData = await response.json();
-
-                if (Array.isArray(rawData) && rawData.length > 0) {
-                    headers = rawData[0];
-                    allData = rawData.slice(1).map(row => {
-                        let obj = {};
-                        headers.forEach((h, i) => {
-                            obj[h] = row[i] !== undefined ? row[i] : '';
-                        });
-                        return obj;
-                    });
-
-                    renderTable(allData);
-                } else {
-                    throw new Error('Tabloda görüntülenecek veri bulunamadı.');
-                }
+                const response = await fetch(CSV_FILE_URL);
+                if (!response.ok) throw new Error('CSV dosyası sunucudan alınamadı.');
+                
+                const csvText = await response.text();
+                localStorage.setItem(CACHE_KEY, csvText);
+                processData(csvText);
             } catch (error) {
                 loading.classList.add('hidden');
-                errorMessage.classList.remove('hidden');
+                document.getElementById('errorMessage').classList.remove('hidden');
                 document.getElementById('errorText').textContent = "Hata: " + error.message;
             }
+        }
+
+        function processData(csvText) {
+            const rawData = parseCSV(csvText);
+            
+            if (Array.isArray(rawData) && rawData.length > 0) {
+                headers = rawData[0];
+                allData = rawData.slice(1).map(row => {
+                    let obj = {};
+                    headers.forEach((h, i) => {
+                        obj[h] = row[i] !== undefined ? row[i] : '';
+                    });
+                    return obj;
+                });
+                
+                renderTable(allData);
+            } else {
+                throw new Error('Tabloda görüntülenecek veri bulunamadı.');
+            }
+        }
+
+        function refreshData() {
+            localStorage.removeItem(CACHE_KEY);
+            fetchAndCacheData();
+        }
+
+        function parseCSV(text) {
+            let lines = text.split('\n');
+            let result = [];
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
+                if (line) {
+                    let row = line.split(',').map(item => item.replace(/^["']|["']$/g, '').trim());
+                    result.push(row);
+                }
+            }
+            return result;
         }
 
         function renderTable(data) {
@@ -98,7 +134,6 @@
             const loading = document.getElementById('loading');
             const tableContainer = document.getElementById('tableContainer');
 
-            // Sadece 4. sütunun (index 3) sağ boşluğu dar, diğerleri px-6
             const padFor = (colIdx) => colIdx === 3 ? 'pl-6 pr-2 w-px' : 'px-6';
 
             let headHtml = '<tr>';
@@ -110,10 +145,10 @@
 
             let bodyHtml = '';
             data.forEach((row, index) => {
-                bodyHtml += `<tr class="hover:bg-gray-700/50 transition-colors ${index % 2 === 0 ? 'bg-gray-800/80' : 'bg-gray-800/100'}">`;
+                bodyHtml += `<tr class="hover:bg-gray-700/50 transition-colors ${index % 2 === 0 ? 'bg-gray-800/80': 'bg-gray-800/100'}">`;
                 headers.forEach((header, colIdx) => {
                     let cellValue = row[header] !== undefined ? row[header] : '';
-
+                    
                     if (header.toLowerCase().includes('cmm') && cellValue) {
                         bodyHtml += `<td class="${padFor(colIdx)} py-4 text-gray-300 whitespace-nowrap">
                                         <a href="https://ttdocs.thyteknik.com/documents/?q:document_chapter:icontains=${cellValue}" target="_blank" class="text-red-500 hover:text-red-400 underline font-medium">
@@ -137,7 +172,7 @@
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
             const filtered = allData.filter(row => {
-                return Object.values(row).some(val =>
+                return Object.values(row).some(val => 
                     String(val).toLowerCase().includes(term)
                 );
             });
