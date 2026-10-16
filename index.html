@@ -12,7 +12,7 @@
 </head>
 <body class="bg-[url('background.jpg')] bg-cover bg-center bg-no-repeat bg-fixed text-gray-100 min-h-screen p-6 flex flex-col">
     <div class="max-w-7xl mx-auto w-full flex flex-col h-full"> 
-        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-gray-900/10 p-6 rounded-2xl shadow-xl border border-gray-700/5 backdrop-blur-sm">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-gray-900/40 p-6 rounded-2xl shadow-xl border border-gray-700/30 backdrop-blur-md">
             <div>
                 <h1 class="text-2xl font-bold text-red-500 tracking-wide">CMM Erişim Ekranı</h1>
             </div>
@@ -33,7 +33,7 @@
 
         <div id="tableContainer" class="hidden flex flex-col flex-grow bg-gray-950/10 rounded-2xl border border-gray-700/5 shadow-xl overflow-hidden backdrop-blur-sm min-h-[400px] max-h-[600px]">
             <div class="overflow-y-auto flex-grow">
-                <table id="dataTable" class="w-full text-left border-collapse">
+                <table id="dataTable" class="w-full text-left border-collapse table-fixed">
                     <thead id="tableHead" class="bg-gray-950 text-gray-300 text-xs uppercase tracking-wider sticky top-0 z-20 shadow-md">
                     </thead>
                     <tbody id="tableBody" class="divide-y divide-gray-700/5 text-sm text-gray-300">
@@ -44,7 +44,7 @@
 
         <div class="flex justify-between items-center mt-6 text-xs text-gray-400 px-2 mt-auto">
             <span>Toplam Kayıt: <span id="rowCount" class="font-semibold text-red-500">0</span></span>
-            <button onclick="refreshData()" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded-md transition-colors font-medium shadow-sm text-[11px]">
+            <button onclick="clearAllFields()" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded-md transition-colors font-medium shadow-sm text-[11px]">
                 Verileri Temizle
             </button>
         </div>
@@ -84,7 +84,7 @@
                 localStorage.setItem(CACHE_KEY, csvText);
                 processData(csvText);
             } catch (error) {
-                loading.classList.add('hidden');
+                loading.classList.remove('hidden');
                 document.getElementById('errorMessage').classList.remove('hidden');
                 document.getElementById('errorText').textContent = "Hata: " + error.message;
             }
@@ -109,10 +109,14 @@
             }
         }
 
+        function clearAllFields() {
+            document.getElementById('searchInput').value = '';
+            renderTable(allData);
+        }
+
         function refreshData() {
             localStorage.removeItem(CACHE_KEY);
-            const searchInput = document.getElementById('searchInput');
-            searchInput.value = '';
+            clearAllFields();
             fetchAndCacheData();
         }
 
@@ -164,7 +168,7 @@
 
             document.getElementById('rowCount').textContent = data.length;
 
-            loading.classList.add('hidden');
+            loading.classList.remove('hidden');
             tableContainer.classList.remove('hidden');
         }
 
