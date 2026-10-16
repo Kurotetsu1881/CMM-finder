@@ -12,12 +12,12 @@
 </head>
 <body class="bg-[url('background.jpg')] bg-cover bg-center bg-no-repeat bg-fixed text-gray-100 min-h-screen p-6 flex flex-col">
     <div class="max-w-7xl mx-auto w-full flex flex-col h-full"> 
-        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-gray-800/60 p-6 rounded-2xl shadow-xl border border-gray-700/50 backdrop-blur-md">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-gray-900/40 p-6 rounded-2xl shadow-xl border border-gray-700/30 backdrop-blur-md">
             <div>
                 <h1 class="text-2xl font-bold text-red-500 tracking-wide">CMM Erişim Ekranı</h1>
             </div>
             <div class="w-full md:w-72">
-                <input type="text" id="searchInput" placeholder="Tabloda ara..." class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-red-500 transition-colors">
+                <input type="text" id="searchInput" placeholder="Tabloda ara..." class="w-full bg-gray-900/80 border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-red-500 transition-colors">
             </div>
         </div>
 
@@ -31,18 +31,18 @@
             <span id="errorText"></span>
         </div>
 
-        <div id="tableContainer" class="hidden flex flex-col flex-grow bg-gray-800/60 rounded-2xl border border-gray-700/50 shadow-xl overflow-hidden backdrop-blur-md min-h-[400px] max-h-[600px]">
+        <div id="tableContainer" class="hidden flex flex-col flex-grow bg-gray-900/30 rounded-2xl border border-gray-700/30 shadow-xl overflow-hidden backdrop-blur-md min-h-[400px] max-h-[600px]">
             <div class="overflow-y-auto flex-grow">
                 <table id="dataTable" class="w-full text-left border-collapse">
-                    <thead id="tableHead" class="bg-gray-900/80 text-gray-400 text-xs uppercase tracking-wider sticky top-0 z-10">
+                    <thead id="tableHead" class="bg-gray-900 text-gray-300 text-xs uppercase tracking-wider sticky top-0 z-20 shadow-md">
                     </thead>
-                    <tbody id="tableBody" class="divide-y divide-gray-700/50 text-sm text-gray-300">
+                    <tbody id="tableBody" class="divide-y divide-gray-700/30 text-sm text-gray-300">
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <div class="flex justify-between items-center mt-6 text-xs text-gray-500 px-2 mt-auto">
+        <div class="flex justify-between items-center mt-6 text-xs text-gray-400 px-2 mt-auto">
             <span>Toplam Kayıt: <span id="rowCount" class="font-semibold text-red-500">0</span></span>
             <button onclick="refreshData()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors font-medium shadow-md">
                 Verileri Yenile
@@ -142,13 +142,13 @@
 
             let bodyHtml = '';
             data.forEach((row, index) => {
-                bodyHtml += `<tr class="hover:bg-gray-700/50 transition-colors ${index % 2 === 0 ? 'bg-gray-800/80': 'bg-gray-800/100'}">`;
+                bodyHtml += `<tr class="hover:bg-gray-800/60 transition-colors ${index % 2 === 0 ? 'bg-gray-950/20': 'bg-transparent'}">`;
                 headers.forEach(header => {
                     let cellValue = row[header] !== undefined ? row[header] : '';
                     
                     if (header.toLowerCase().includes('cmm') && cellValue) {
                         bodyHtml += `<td class="px-3 py-4 text-gray-300 whitespace-nowrap">
-                                        <a href="https://ttdocs.thyteknik.com/documents/?q:document_chapter:icontains=${cellValue}" target="_blank" class="text-red-500 hover:text-red-400 underline font-medium">
+                                        <a href="https://ttdocs.thyteknik.com/documents/?q:document_chapter:icontains=${cellValue}" target="_blank" class="text-red-400 hover:text-red-300 underline font-medium">
                                             ${cellValue}
                                         </a>
                                      </td>`;
