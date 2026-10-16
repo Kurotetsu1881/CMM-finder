@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CMM finder</title>
+    <title>BAY1 Uçak Bakım Takip</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -85,7 +85,7 @@
                 localStorage.setItem(CACHE_KEY, csvText);
                 processData(csvText);
             } catch (error) {
-                loading.classList.add('hidden');
+                loading.classList.remove('hidden');
                 document.getElementById('errorMessage').classList.remove('hidden');
                 document.getElementById('errorText').textContent = "Hata: " + error.message;
             }
@@ -134,11 +134,10 @@
             const loading = document.getElementById('loading');
             const tableContainer = document.getElementById('tableContainer');
 
-            const padFor = (colIdx) => colIdx === 3 ? 'pl-6 pr-2 w-px' : 'px-6';
-
+            // Sütun boşlukları daraltıldı (px-3)
             let headHtml = '<tr>';
-            headers.forEach((header, colIdx) => {
-                headHtml += `<th class="${padFor(colIdx)} py-4 font-semibold">${header}</th>`;
+            headers.forEach(header => {
+                headHtml += `<th class="px-3 py-4 font-semibold">${header}</th>`;
             });
             headHtml += '</tr>';
             tHead.innerHTML = headHtml;
@@ -146,17 +145,17 @@
             let bodyHtml = '';
             data.forEach((row, index) => {
                 bodyHtml += `<tr class="hover:bg-gray-700/50 transition-colors ${index % 2 === 0 ? 'bg-gray-800/80': 'bg-gray-800/100'}">`;
-                headers.forEach((header, colIdx) => {
+                headers.forEach(header => {
                     let cellValue = row[header] !== undefined ? row[header] : '';
                     
                     if (header.toLowerCase().includes('cmm') && cellValue) {
-                        bodyHtml += `<td class="${padFor(colIdx)} py-4 text-gray-300 whitespace-nowrap">
+                        bodyHtml += `<td class="px-3 py-4 text-gray-300 whitespace-nowrap">
                                         <a href="https://ttdocs.thyteknik.com/documents/?q:document_chapter:icontains=${cellValue}" target="_blank" class="text-red-500 hover:text-red-400 underline font-medium">
                                             ${cellValue}
                                         </a>
                                      </td>`;
                     } else {
-                        bodyHtml += `<td class="${padFor(colIdx)} py-4 text-gray-300 whitespace-nowrap">${cellValue}</td>`;
+                        bodyHtml += `<td class="px-3 py-4 text-gray-300 whitespace-nowrap">${cellValue}</td>`;
                     }
                 });
                 bodyHtml += '</tr>';
