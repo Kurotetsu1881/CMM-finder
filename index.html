@@ -10,9 +10,9 @@
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="bg-[url('background.jpg')] bg-cover bg-center bg-no-repeat text-gray-100 min-h-screen p-6">
-    <div class="max-w-7xl mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 bg-gray-800/80 p-6 rounded-2xl shadow-xl border border-gray-700 backdrop-blur-md">
+<body class="bg-[url('background.jpg')] bg-cover bg-center bg-no-repeat bg-fixed text-gray-100 min-h-screen p-6 flex flex-col">
+    <div class="max-w-7xl mx-auto w-full flex flex-col h-full"> 
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-gray-800/60 p-6 rounded-2xl shadow-xl border border-gray-700/50 backdrop-blur-md">
             <div>
                 <h1 class="text-2xl font-bold text-red-500 tracking-wide">CMM Erişim Ekranı</h1>
             </div>
@@ -21,7 +21,7 @@
             </div>
         </div>
 
-        <div id="loading" class="flex flex-col items-center justify-center py-20">
+        <div id="loading" class="flex flex-col items-center justify-center py-20 flex-grow">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mb-4"></div>
             <p class="text-gray-400 text-sm">Veriler yükleniyor, lütfen bekleyin...</p>
         </div>
@@ -31,18 +31,18 @@
             <span id="errorText"></span>
         </div>
 
-        <div id="tableContainer" class="hidden bg-gray-800/80 rounded-2xl border border-gray-700 shadow-xl overflow-hidden min-h-[400px] backdrop-blur-md">
-            <div class="overflow-x-auto">
+        <div id="tableContainer" class="hidden flex flex-col flex-grow bg-gray-800/60 rounded-2xl border border-gray-700/50 shadow-xl overflow-hidden backdrop-blur-md min-h-[400px] max-h-[600px]">
+            <div class="overflow-y-auto flex-grow">
                 <table id="dataTable" class="w-full text-left border-collapse">
-                    <thead id="tableHead" class="bg-gray-900/80 text-gray-400 text-xs uppercase tracking-wider">
+                    <thead id="tableHead" class="bg-gray-900/80 text-gray-400 text-xs uppercase tracking-wider sticky top-0 z-10">
                     </thead>
-                    <tbody id="tableBody" class="divide-y divide-gray-700 text-sm text-gray-300">
+                    <tbody id="tableBody" class="divide-y divide-gray-700/50 text-sm text-gray-300">
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <div class="flex justify-between items-center mt-6 text-xs text-gray-500 px-2">
+        <div class="flex justify-between items-center mt-6 text-xs text-gray-500 px-2 mt-auto">
             <span>Toplam Kayıt: <span id="rowCount" class="font-semibold text-red-500">0</span></span>
             <button onclick="refreshData()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors font-medium shadow-md">
                 Verileri Yenile
@@ -84,7 +84,7 @@
                 localStorage.setItem(CACHE_KEY, csvText);
                 processData(csvText);
             } catch (error) {
-                loading.classList.remove('hidden');
+                loading.classList.add('hidden');
                 document.getElementById('errorMessage').classList.remove('hidden');
                 document.getElementById('errorText').textContent = "Hata: " + error.message;
             }
