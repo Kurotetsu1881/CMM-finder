@@ -34,8 +34,7 @@
         <div id="tableContainer" class="hidden flex flex-col flex-grow bg-gray-950/10 rounded-2xl border border-gray-700/5 shadow-xl overflow-hidden backdrop-blur-sm min-h-[400px] max-h-[600px]">
             <div class="overflow-y-auto flex-grow">
                 <table id="dataTable" class="w-full text-left border-collapse table-fixed">
-                    <!-- Başlık kısmı istenildiği gibi daha şeffaf yapıldı -->
-                    <thead id="tableHead" class="bg-gray-950/20 text-gray-300 text-xs uppercase tracking-wider sticky top-0 z-20 shadow-md backdrop-blur-md">
+                    <thead id="tableHead" class="bg-gray-950/10 text-gray-300 text-xs uppercase tracking-wider sticky top-0 z-20 shadow-md backdrop-blur-md">
                     </thead>
                     <tbody id="tableBody" class="divide-y divide-gray-700/5 text-sm text-gray-300">
                     </tbody>
@@ -76,7 +75,6 @@
         }
 
         async function fetchAndCacheData() {
-            const loading = document.getElementById('loading');
             try {
                 const response = await fetch(CSV_FILE_URL);
                 if (!response.ok) throw new Error('CSV dosyası sunucudan alınamadı.');
@@ -85,6 +83,7 @@
                 localStorage.setItem(CACHE_KEY, csvText);
                 processData(csvText);
             } catch (error) {
+                const loading = document.getElementById('loading');
                 loading.classList.add('hidden');
                 document.getElementById('errorMessage').classList.remove('hidden');
                 document.getElementById('errorText').textContent = "Hata: " + error.message;
@@ -132,7 +131,7 @@
         }
 
         function renderTable(data) {
-            const tHead = document.getElementById('tableHead');i
+            const tHead = document.getElementById('tableHead');
             const tBody = document.getElementById('tableBody');
             const loading = document.getElementById('loading');
             const tableContainer = document.getElementById('tableContainer');
