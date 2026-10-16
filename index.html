@@ -12,7 +12,7 @@
 </head>
 <body class="bg-[url('background.jpg')] bg-cover bg-center bg-no-repeat bg-fixed text-gray-100 min-h-screen p-6 flex flex-col">
     <div class="max-w-7xl mx-auto w-full flex flex-col h-full"> 
-        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-gray-900/40 p-6 rounded-2xl shadow-xl border border-gray-700/30 backdrop-blur-md">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-gray-900/10 p-6 rounded-2xl shadow-xl border border-gray-700/5 backdrop-blur-sm">
             <div>
                 <h1 class="text-2xl font-bold text-red-500 tracking-wide">CMM Erişim Ekranı</h1>
             </div>
@@ -33,8 +33,10 @@
 
         <div id="tableContainer" class="hidden flex flex-col flex-grow bg-gray-950/10 rounded-2xl border border-gray-700/5 shadow-xl overflow-hidden backdrop-blur-sm min-h-[400px] max-h-[600px]">
             <div class="overflow-y-auto flex-grow">
+                <!-- table-fixed sınıfı ile sütun kaymaları engellendi -->
                 <table id="dataTable" class="w-full text-left border-collapse table-fixed">
-                    <thead id="tableHead" class="bg-gray-950 text-gray-300 text-xs uppercase tracking-wider sticky top-0 z-20 shadow-md">
+                    <!-- Başlık satırı şeffaflık kazandırıldı -->
+                    <thead id="tableHead" class="bg-gray-950/65 text-gray-300 text-xs uppercase tracking-wider sticky top-0 z-20 shadow-md backdrop-blur-md">
                     </thead>
                     <tbody id="tableBody" class="divide-y divide-gray-700/5 text-sm text-gray-300">
                     </tbody>
@@ -44,7 +46,7 @@
 
         <div class="flex justify-between items-center mt-6 text-xs text-gray-400 px-2 mt-auto">
             <span>Toplam Kayıt: <span id="rowCount" class="font-semibold text-red-500">0</span></span>
-            <button onclick="clearAllFields()" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded-md transition-colors font-medium shadow-sm text-[11px]">
+            <button onclick="refreshData()" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded-md transition-colors font-medium shadow-sm text-[11px]">
                 Verileri Temizle
             </button>
         </div>
@@ -84,7 +86,7 @@
                 localStorage.setItem(CACHE_KEY, csvText);
                 processData(csvText);
             } catch (error) {
-                loading.classList.remove('hidden');
+                loading.classList.add('hidden');
                 document.getElementById('errorMessage').classList.remove('hidden');
                 document.getElementById('errorText').textContent = "Hata: " + error.message;
             }
@@ -109,14 +111,10 @@
             }
         }
 
-        function clearAllFields() {
-            document.getElementById('searchInput').value = '';
-            renderTable(allData);
-        }
-
         function refreshData() {
             localStorage.removeItem(CACHE_KEY);
-            clearAllFields();
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = '';
             fetchAndCacheData();
         }
 
@@ -141,7 +139,7 @@
 
             let headHtml = '<tr>';
             headers.forEach(header => {
-                headHtml += `<th class="px-3 py-4 font-semibold">${header}</th>`;
+                headHtml += `<th class="px-3 py-4 font-semibold truncate">${header}</th>`;
             });
             headHtml += '</tr>';
             tHead.innerHTML = headHtml;
@@ -153,13 +151,13 @@
                     let cellValue = row[header] !== undefined ? row[header] : '';
                     
                     if (header.toLowerCase().includes('cmm') && cellValue) {
-                        bodyHtml += `<td class="px-3 py-4 text-gray-300 whitespace-nowrap">
+                        bodyHtml += `<td class="px-3 py-4 text-gray-300 whitespace-nowrap truncate">
                                         <a href="https://ttdocs.thyteknik.com/documents/?q:document_chapter:icontains=${cellValue}" target="_blank" class="text-red-400 hover:text-red-300 underline font-medium">
                                             ${cellValue}
                                         </a>
                                      </td>`;
                     } else {
-                        bodyHtml += `<td class="px-3 py-4 text-gray-300 whitespace-nowrap">${cellValue}</td>`;
+                        bodyHtml += `<td class="px-3 py-4 text-gray-300 whitespace-nowrap truncate">${cellValue}</td>`;
                     }
                 });
                 bodyHtml += '</tr>';
@@ -168,7 +166,7 @@
 
             document.getElementById('rowCount').textContent = data.length;
 
-            loading.classList.remove('hidden');
+            loading.classList.add('hidden');
             tableContainer.classList.remove('hidden');
         }
 
