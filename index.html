@@ -11,37 +11,37 @@
     </style>
 </head>
 <body class="bg-gray-900 bg-cover bg-center bg-no-repeat bg-fixed text-gray-100 h-screen p-6 flex flex-col overflow-hidden" style="background-image: url('background.jpg');">
-    <div class="max-w-7xl mx-auto w-full flex flex-col h-full"> 
+    <div class="max-w-7xl mx-auto w-full flex flex-col h-full overflow-hidden"> 
         
-        <!-- Üst Arama ve Başlık Barı (Sabit ve Şeffaf) -->
-        <div class="flex-shrink-0 flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-gray-900 bg-opacity-40 p-6 rounded-2xl shadow-xl border border-gray-700 border-opacity-30 backdrop-blur-sm">
+        <!-- Üst Arama ve Başlık Barı (Sabit ve Bağımsız) -->
+        <div class="flex-shrink-0 flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-gray-900 bg-opacity-80 p-6 rounded-2xl shadow-xl border border-gray-700 border-opacity-50 backdrop-blur-md">
             <div>
                 <h1 class="text-2xl font-bold text-red-500 tracking-wide">CMM Erişim Ekranı</h1>
             </div>
             <div class="w-full md:w-72">
-                <input type="text" id="searchInput" placeholder="Tabloda ara..." class="w-full bg-gray-950 bg-opacity-40 border border-gray-700 border-opacity-30 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-red-500 transition-colors backdrop-blur-sm">
+                <input type="text" id="searchInput" placeholder="Tabloda ara..." class="w-full bg-gray-950 bg-opacity-80 border border-gray-700 border-opacity-50 rounded-xl px-4 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:border-red-500 transition-colors backdrop-blur-md">
             </div>
         </div>
 
         <!-- Yükleniyor Göstergesi -->
         <div id="loading" class="flex flex-col items-center justify-center py-20 flex-grow">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mb-4"></div>
-            <p class="text-gray-400 text-sm">Veriler yükleniyor, lütfen bekleyin...</p>
+            <p class="text-gray-300 text-sm">Veriler yükleniyor, lütfen bekleyin...</p>
         </div>
 
         <!-- Hata Mesajı -->
-        <div id="errorMessage" class="hidden flex-shrink-0 bg-red-900 bg-opacity-50 border border-red-500 text-red-200 px-6 py-4 rounded-xl flex items-center shadow-lg mb-4">
+        <div id="errorMessage" class="hidden flex-shrink-0 bg-red-900 bg-opacity-70 border border-red-500 text-red-200 px-6 py-4 rounded-xl flex items-center shadow-lg mb-4">
             <svg class="w-6 h-6 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.667.192 3 1.732 3z"></path></svg>
             <span id="errorText"></span>
         </div>
 
         <!-- Tablo Kapsayıcısı (Başlığın Altında Kayan Alan) -->
-        <div id="tableContainer" class="hidden flex-grow flex flex-col min-h-0 bg-gray-950 bg-opacity-30 rounded-2xl border border-gray-700 border-opacity-30 shadow-xl overflow-hidden backdrop-blur-sm">
+        <div id="tableContainer" class="hidden flex-grow flex flex-col min-h-0 bg-gray-950 bg-opacity-75 rounded-2xl border border-gray-700 border-opacity-50 shadow-xl overflow-hidden backdrop-blur-md">
             <div class="overflow-y-auto flex-grow relative">
                 <table id="dataTable" class="w-full text-left border-collapse table-fixed border-spacing-0">
-                    <thead id="tableHead" class="bg-gray-950 text-gray-300 text-xs uppercase tracking-wider sticky top-0 z-20 shadow-md">
+                    <thead id="tableHead" class="bg-gray-950 text-gray-200 text-xs uppercase tracking-wider sticky top-0 z-20 shadow-md">
                     </thead>
-                    <tbody id="tableBody" class="divide-y divide-gray-700 divide-opacity-30 text-sm text-gray-300">
+                    <tbody id="tableBody" class="divide-y divide-gray-700 divide-opacity-40 text-sm text-gray-300">
                     </tbody>
                 </table>
             </div>
@@ -153,7 +153,7 @@
 
             let bodyHtml = '';
             data.forEach((row) => {
-                bodyHtml += `<tr class="hover:bg-gray-800 hover:bg-opacity-30 transition-colors bg-transparent">`;
+                bodyHtml += `<tr class="hover:bg-gray-800 hover:bg-opacity-40 transition-colors bg-transparent">`;
                 headers.forEach(header => {
                     let cellValue = row[header] !== undefined ? row[header] : '';
                     
