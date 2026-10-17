@@ -9,33 +9,38 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
 
-        /* Üst başlık barı: daha şeffaf */
+        /* Üst başlık barı */
         .top-bar {
             background: rgba(17, 24, 39, 0.55);
             -webkit-backdrop-filter: blur(8px);
             backdrop-filter: blur(8px);
         }
 
-        /* Arama kutusu: saydam */
+        /* Arama kutusu */
         .search-box {
-            background: rgba(3, 7, 18, 0.4);
+            background: rgba(3, 7, 18, 0.5);
             color: #ffffff;
             -webkit-text-fill-color: #ffffff;
         }
         .search-box::placeholder { color: #9ca3af; }
 
-        /* Tablo paneli: daha opak */
-        .table-panel {
-            background: rgba(3, 7, 18, 0.65);
+        /* Tablo bölümü: dıştaki kutu sadece çerçeve, arka planlar içeride */
+        .table-wrap {
+            border: 1px solid rgba(55, 65, 81, 0.5);
         }
 
-        /* Başlık satırı: her th sticky ve tam opak, üst üste binme olmaz */
-        #tableHead th {
-            position: sticky;
-            top: 0;
-            z-index: 20;
-            background: #030712;
+        /* Sabit başlık satırı: kayan alanın DIŞINDA, şeffaf */
+        .head-bar {
+            background: rgba(3, 7, 18, 0.45);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            border-bottom: 2px solid rgba(239, 68, 68, 0.6);
             color: #e5e7eb;
+        }
+
+        /* Kayan liste: başlığın bittiği yerden başlar */
+        .body-scroll {
+            background: rgba(3, 7, 18, 0.7);
         }
     </style>
 </head>
@@ -64,12 +69,20 @@
             <span id="errorText"></span>
         </div>
 
-        <!-- Tablo Kapsayıcısı -->
-        <div id="tableContainer" class="table-panel hidden flex-grow flex flex-col min-h-0 rounded-2xl border border-gray-700 border-opacity-50 shadow-xl overflow-hidden">
-            <div class="overflow-y-auto flex-grow relative">
-                <table id="dataTable" class="w-full text-left border-collapse table-fixed">
-                    <thead id="tableHead" class="text-xs uppercase tracking-wider shadow-md">
+        <!-- Tablo Bölümü -->
+        <div id="tableContainer" class="table-wrap hidden flex-grow flex flex-col min-h-0 rounded-2xl shadow-xl overflow-hidden">
+
+            <!-- 1) Sabit başlık satırı (kayan alanın dışında) -->
+            <div id="headBar" class="head-bar flex-shrink-0">
+                <table class="w-full text-left border-collapse table-fixed">
+                    <thead id="tableHead" class="text-xs uppercase tracking-wider">
                     </thead>
+                </table>
+            </div>
+
+            <!-- 2) Kayan liste (başlığın bittiği çizgiden başlar) -->
+            <div id="bodyScroll" class="body-scroll overflow-y-auto flex-grow min-h-0">
+                <table id="dataTable" class="w-full text-left border-collapse table-fixed">
                     <tbody id="tableBody" class="divide-y divide-gray-700 divide-opacity-40 text-sm text-gray-300">
                     </tbody>
                 </table>
@@ -167,6 +180,14 @@
             return result;
         }
 
+        // Kaydırma çubuğu genişliği kadar başlığa sağ boşluk ver, sütunlar hizalı kalsın
+        function syncHeadWidth() {
+            const scroller = document.getElementById('bodyScroll');
+            const headBar = document.getElementById('headBar');
+            const sbWidth = scroller.offsetWidth - scroller.clientWidth;
+            headBar.style.paddingRight = sbWidth + 'px';
+        }
+
         function renderTable(data) {
             const tHead = document.getElementById('tableHead');
             const tBody = document.getElementById('tableBody');
@@ -204,6 +225,7 @@
 
             loading.classList.add('hidden');
             tableContainer.classList.remove('hidden');
+            syncHeadWidth();
         }
 
         document.getElementById('searchInput').addEventListener('input', (e) => {
@@ -215,6 +237,8 @@
             });
             renderTable(filtered);
         });
+
+        window.addEventListener('resize', syncHeadWidth);
 
         loadData();
     </script>
