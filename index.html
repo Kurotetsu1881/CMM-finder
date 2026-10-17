@@ -24,23 +24,23 @@
         }
         .search-box::placeholder { color: #9ca3af; }
 
-        /* Tablo bölümü: dıştaki kutu sadece çerçeve, arka planlar içeride */
+        /* Tablo bölümü çerçevesi */
         .table-wrap {
             border: 1px solid rgba(55, 65, 81, 0.5);
         }
 
-        /* Sabit başlık satırı: kayan alanın DIŞINDA, şeffaf */
+        /* Sabit başlık satırı: üst bar ile aynı renk ve şeffaflık */
         .head-bar {
-            background: rgba(3, 7, 18, 0.45);
+            background: rgba(17, 24, 39, 0.5);
             -webkit-backdrop-filter: blur(8px);
             backdrop-filter: blur(8px);
             border-bottom: 2px solid rgba(239, 68, 68, 0.6);
             color: #e5e7eb;
         }
 
-        /* Kayan liste: başlığın bittiği yerden başlar */
+        /* Kayan liste */
         .body-scroll {
-            background: rgba(3, 7, 18, 0.5);
+            background: rgba(3, 7, 18, 0.7);
         }
     </style>
 </head>
@@ -72,7 +72,7 @@
         <!-- Tablo Bölümü -->
         <div id="tableContainer" class="table-wrap hidden flex-grow flex flex-col min-h-0 rounded-2xl shadow-xl overflow-hidden">
 
-            <!-- 1) Sabit başlık satırı (kayan alanın dışında) -->
+            <!-- Sabit başlık satırı (kayan alanın dışında) -->
             <div id="headBar" class="head-bar flex-shrink-0">
                 <table class="w-full text-left border-collapse table-fixed">
                     <thead id="tableHead" class="text-xs uppercase tracking-wider">
@@ -80,7 +80,7 @@
                 </table>
             </div>
 
-            <!-- 2) Kayan liste (başlığın bittiği çizgiden başlar) -->
+            <!-- Kayan liste -->
             <div id="bodyScroll" class="body-scroll overflow-y-auto flex-grow min-h-0">
                 <table id="dataTable" class="w-full text-left border-collapse table-fixed">
                     <tbody id="tableBody" class="divide-y divide-gray-700 divide-opacity-40 text-sm text-gray-300">
@@ -105,37 +105,48 @@
         let allData = [];
         let headers = [];
 
+        // Sayfa açılışı: önbellek varsa hemen göster, arkadan taze veriyi kontrol et
         async function loadData() {
             const loading = document.getElementById('loading');
             const tableContainer = document.getElementById('tableContainer');
             const errorMessage = document.getElementById('errorMessage');
 
-            loading.classList.remove('hidden');
-            tableContainer.classList.add('hidden');
             errorMessage.classList.add('hidden');
 
-            const cachedData = localStorage.getItem(CACHE_KEY);
+            let cachedData = null;
+            try { cachedData = localStorage.getItem(CACHE_KEY); } catch (e) {}
 
             if (cachedData) {
+                // Hızlı açılış: eski veriyi hemen göster
                 processData(cachedData);
+                // Arka planda taze veriyi çek, farklıysa tabloyu güncelle
+                fetchAndCacheData(cachedData, true);
             } else {
-                fetchAndCacheData();
+                loading.classList.remove('hidden');
+                tableContainer.classList.add('hidden');
+                fetchAndCacheData(null, false);
             }
         }
 
-        async function fetchAndCacheData() {
+        async function fetchAndCacheData(previousText, silent) {
             try {
-                const response = await fetch(CSV_FILE_URL);
+                // no-store: tarayıcının kendi HTTP önbelleğini atla, dosyayı gerçekten sunucudan al
+                const response = await fetch(CSV_FILE_URL, { cache: 'no-store' });
                 if (!response.ok) throw new Error('CSV dosyası sunucudan alınamadı.');
 
                 const csvText = await response.text();
-                localStorage.setItem(CACHE_KEY, csvText);
-                processData(csvText);
+
+                if (csvText !== previousText) {
+                    try { localStorage.setItem(CACHE_KEY, csvText); } catch (e) {}
+                    processData(csvText);
+                }
             } catch (error) {
-                const loading = document.getElementById('loading');
-                loading.classList.add('hidden');
-                document.getElementById('errorMessage').classList.remove('hidden');
-                document.getElementById('errorText').textContent = "Hata: " + error.message;
+                // Sessiz modda (önbellek zaten gösteriliyor) hata göstermeyiz
+                if (!silent) {
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('errorMessage').classList.remove('hidden');
+                    document.getElementById('errorText').textContent = "Hata: " + error.message;
+                }
             }
         }
 
@@ -152,7 +163,7 @@
                     return obj;
                 });
 
-                renderTable(allData);
+                applyFilter();
             } else {
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('errorMessage').classList.remove('hidden');
@@ -160,11 +171,11 @@
             }
         }
 
+        // Verileri Temizle butonu: önbelleği sil, taze veriyi çek
         function refreshData() {
-            localStorage.removeItem(CACHE_KEY);
-            const searchInput = document.getElementById('searchInput');
-            searchInput.value = '';
-            fetchAndCacheData();
+            try { localStorage.removeItem(CACHE_KEY); } catch (e) {}
+            document.getElementById('searchInput').value = '';
+            fetchAndCacheData(null, false);
         }
 
         function parseCSV(text) {
@@ -228,16 +239,18 @@
             syncHeadWidth();
         }
 
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
+        // Aramadaki mevcut metne göre filtrele (taze veri gelince arama kaybolmaz)
+        function applyFilter() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
             const filtered = allData.filter(row => {
                 return Object.values(row).some(val =>
                     String(val).toLowerCase().includes(term)
                 );
             });
             renderTable(filtered);
-        });
+        }
 
+        document.getElementById('searchInput').addEventListener('input', applyFilter);
         window.addEventListener('resize', syncHeadWidth);
 
         loadData();
