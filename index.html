@@ -14,12 +14,12 @@
     <div class="max-w-7xl mx-auto w-full flex flex-col h-full overflow-hidden"> 
         
         <!-- Üst Arama ve Başlık Barı (Sabit ve Bağımsız) -->
-        <div class="flex-shrink-0 flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-gray-900 bg-opacity-80 p-6 rounded-2xl shadow-xl border border-gray-700 border-opacity-50 backdrop-blur-md">
+        <div class="flex-shrink-0 flex flex-col md:flex-row justify-between items-center mb-4 gap-4 bg-gray-900 bg-opacity-85 p-5 rounded-2xl shadow-xl border border-gray-700 border-opacity-50 backdrop-blur-md">
             <div>
                 <h1 class="text-2xl font-bold text-red-500 tracking-wide">CMM Erişim Ekranı</h1>
             </div>
             <div class="w-full md:w-72">
-                <input type="text" id="searchInput" placeholder="Tabloda ara..." class="w-full bg-gray-950 bg-opacity-80 border border-gray-700 border-opacity-50 rounded-xl px-4 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:border-red-500 transition-colors backdrop-blur-md">
+                <input type="text" id="searchInput" placeholder="Tabloda ara..." class="w-full bg-gray-950 bg-opacity-90 border border-gray-700 border-opacity-50 rounded-xl px-4 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:border-red-500 transition-colors backdrop-blur-md">
             </div>
         </div>
 
@@ -30,13 +30,13 @@
         </div>
 
         <!-- Hata Mesajı -->
-        <div id="errorMessage" class="hidden flex-shrink-0 bg-red-900 bg-opacity-70 border border-red-500 text-red-200 px-6 py-4 rounded-xl flex items-center shadow-lg mb-4">
+        <div id="errorMessage" class="hidden flex-shrink-0 bg-red-900 bg-opacity-80 border border-red-500 text-red-200 px-6 py-4 rounded-xl flex items-center shadow-lg mb-4">
             <svg class="w-6 h-6 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.667.192 3 1.732 3z"></path></svg>
             <span id="errorText"></span>
         </div>
 
-        <!-- Tablo Kapsayıcısı (Başlığın Altında Kayan Alan) -->
-        <div id="tableContainer" class="hidden flex-grow flex flex-col min-h-0 bg-gray-950 bg-opacity-75 rounded-2xl border border-gray-700 border-opacity-50 shadow-xl overflow-hidden backdrop-blur-md">
+        <!-- Tablo Kapsayıcısı (Şeffaflığı azaltılmış, başlığın altında kalan bağımsız kaydırma alanı) -->
+        <div id="tableContainer" class="hidden flex-grow flex flex-col min-h-0 bg-gray-950 bg-opacity-90 rounded-2xl border border-gray-700 border-opacity-50 shadow-xl overflow-hidden backdrop-blur-md">
             <div class="overflow-y-auto flex-grow relative">
                 <table id="dataTable" class="w-full text-left border-collapse table-fixed border-spacing-0">
                     <thead id="tableHead" class="bg-gray-950 text-gray-200 text-xs uppercase tracking-wider sticky top-0 z-20 shadow-md">
@@ -48,7 +48,7 @@
         </div>
 
         <!-- Alt Bilgi / Footer (Sabit) -->
-        <div class="flex-shrink-0 flex justify-between items-center mt-4 text-xs text-gray-400 px-2">
+        <div class="flex-shrink-0 flex justify-between items-center mt-3 text-xs text-gray-400 px-2">
             <span>Toplam Kayıt: <span id="rowCount" class="font-semibold text-red-500">0</span></span>
             <button onclick="refreshData()" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded-md transition-colors font-medium shadow-sm text-[11px]">
                 Verileri Temizle
