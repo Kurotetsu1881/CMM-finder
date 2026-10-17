@@ -11,8 +11,7 @@
     </style>
 </head>
 <body class="bg-[url('background.jpg')] bg-cover bg-center bg-no-repeat bg-fixed text-gray-100 min-h-screen p-6 flex flex-col">
-    <div class="max-w-7xl mx-auto w-full flex flex-col flex-grow"> 
-        <!-- Üst Arama ve Başlık Barı -->
+    <div class="max-w-7xl mx-auto w-full flex flex-col h-full"> 
         <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-gray-900/10 p-6 rounded-2xl shadow-xl border border-gray-700/5 backdrop-blur-sm">
             <div>
                 <h1 class="text-2xl font-bold text-red-500 tracking-wide">CMM Erişim Ekranı</h1>
@@ -22,20 +21,17 @@
             </div>
         </div>
 
-        <!-- Yükleniyor Göstergesi -->
         <div id="loading" class="flex flex-col items-center justify-center py-20 flex-grow">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mb-4"></div>
             <p class="text-gray-400 text-sm">Veriler yükleniyor, lütfen bekleyin...</p>
         </div>
 
-        <!-- Hata Mesajı -->
         <div id="errorMessage" class="hidden bg-red-900/50 border border-red-500 text-red-200 px-6 py-4 rounded-xl flex items-center shadow-lg">
             <svg class="w-6 h-6 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.667.192 3 1.732 3z"></path></svg>
             <span id="errorText"></span>
         </div>
 
-        <!-- Tablo Kapsayıcısı (Sayfa boyunca esneyen dinamik alan) -->
-        <div id="tableContainer" class="hidden flex flex-col flex-grow bg-gray-950/10 rounded-2xl border border-gray-700/5 shadow-xl overflow-hidden backdrop-blur-sm min-h-[400px]">
+        <div id="tableContainer" class="hidden flex flex-col flex-grow bg-gray-950/10 rounded-2xl border border-gray-700/5 shadow-xl overflow-hidden backdrop-blur-sm min-h-[400px] max-h-[600px]">
             <div class="overflow-y-scroll flex-grow relative">
                 <table id="dataTable" class="w-full text-left border-collapse table-fixed border-spacing-0">
                     <thead id="tableHead" class="bg-gray-950 text-gray-300 text-xs uppercase tracking-wider sticky top-0 z-20 shadow-md">
@@ -46,8 +42,7 @@
             </div>
         </div>
 
-        <!-- Alt Bilgi / Footer -->
-        <div class="flex justify-between items-center mt-6 text-xs text-gray-400 px-2">
+        <div class="flex justify-between items-center mt-6 text-xs text-gray-400 px-2 mt-auto">
             <span>Toplam Kayıt: <span id="rowCount" class="font-semibold text-red-500">0</span></span>
             <button onclick="refreshData()" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded-md transition-colors font-medium shadow-sm text-[11px]">
                 Verileri Temizle
@@ -155,4 +150,36 @@
                     let cellValue = row[header] !== undefined ? row[header] : '';
                     
                     if (header.toLowerCase().includes('cmm') && cellValue) {
-                        bodyHtml += `<td class="px-3 py-4 text-gray-
+                        bodyHtml += `<td class="px-3 py-4 text-gray-300 whitespace-nowrap truncate">
+                                        <a href="https://ttdocs.thyteknik.com/documents/?q:document_chapter:icontains=${cellValue}" target="_blank" class="text-red-400 hover:text-red-300 underline font-medium">
+                                            ${cellValue}
+                                        </a>
+                                     </td>`;
+                    } else {
+                        bodyHtml += `<td class="px-3 py-4 text-gray-300 whitespace-nowrap truncate">${cellValue}</td>`;
+                    }
+                });
+                bodyHtml += '</tr>';
+            });
+            tBody.innerHTML = bodyHtml;
+
+            document.getElementById('rowCount').textContent = data.length;
+
+            loading.classList.add('hidden');
+            tableContainer.classList.remove('hidden');
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allData.filter(row => {
+                return Object.values(row).some(val => 
+                    String(val).toLowerCase().includes(term)
+                );
+            });
+            renderTable(filtered);
+        });
+
+        loadData();
+    </script>
+</body>
+</html>
