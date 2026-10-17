@@ -8,18 +8,47 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
+
+        /* Üst başlık barı: daha şeffaf */
+        .top-bar {
+            background: rgba(17, 24, 39, 0.55);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+        }
+
+        /* Arama kutusu: koyu zemin, açık renk yazı */
+        .search-box {
+            background: rgba(3, 7, 18, 0.85);
+            color: #ffffff;
+            -webkit-text-fill-color: #ffffff;
+        }
+        .search-box::placeholder { color: #9ca3af; }
+
+        /* Tablo paneli: daha opak */
+        .table-panel {
+            background: rgba(3, 7, 18, 0.95);
+        }
+
+        /* Başlık satırı: her th sticky ve tam opak, üst üste binme olmaz */
+        #tableHead th {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: #030712;
+            color: #e5e7eb;
+        }
     </style>
 </head>
 <body class="bg-gray-900 bg-cover bg-center bg-no-repeat bg-fixed text-gray-100 h-screen p-6 flex flex-col overflow-hidden" style="background-image: url('background.jpg');">
-    <div class="max-w-7xl mx-auto w-full flex flex-col h-full overflow-hidden"> 
-        
-        <!-- Üst Arama ve Başlık Barı (Sabit ve Bağımsız) -->
-        <div class="flex-shrink-0 flex flex-col md:flex-row justify-between items-center mb-4 gap-4 bg-gray-900 bg-opacity-85 p-5 rounded-2xl shadow-xl border border-gray-700 border-opacity-50 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto w-full flex flex-col h-full overflow-hidden">
+
+        <!-- Üst Arama ve Başlık Barı -->
+        <div class="top-bar flex-shrink-0 flex flex-col md:flex-row justify-between items-center mb-4 gap-4 p-5 rounded-2xl shadow-xl border border-gray-700 border-opacity-50">
             <div>
                 <h1 class="text-2xl font-bold text-red-500 tracking-wide">CMM Erişim Ekranı</h1>
             </div>
             <div class="w-full md:w-72">
-                <input type="text" id="searchInput" placeholder="Tabloda ara..." class="w-full bg-gray-950 bg-opacity-90 border border-gray-700 border-opacity-50 rounded-xl px-4 py-2.5 text-white placeholder-gray-400 focus:outline-none focus:border-red-500 transition-colors backdrop-blur-md">
+                <input type="text" id="searchInput" placeholder="Tabloda ara..." class="search-box w-full border border-gray-700 rounded-xl px-4 py-2.5 focus:outline-none focus:border-red-500 transition-colors">
             </div>
         </div>
 
@@ -35,11 +64,11 @@
             <span id="errorText"></span>
         </div>
 
-        <!-- Tablo Kapsayıcısı (Şeffaflığı azaltılmış, başlığın altında kalan bağımsız kaydırma alanı) -->
-        <div id="tableContainer" class="hidden flex-grow flex flex-col min-h-0 bg-gray-950 bg-opacity-90 rounded-2xl border border-gray-700 border-opacity-50 shadow-xl overflow-hidden backdrop-blur-md">
+        <!-- Tablo Kapsayıcısı -->
+        <div id="tableContainer" class="table-panel hidden flex-grow flex flex-col min-h-0 rounded-2xl border border-gray-700 border-opacity-50 shadow-xl overflow-hidden">
             <div class="overflow-y-auto flex-grow relative">
-                <table id="dataTable" class="w-full text-left border-collapse table-fixed border-spacing-0">
-                    <thead id="tableHead" class="bg-gray-950 text-gray-200 text-xs uppercase tracking-wider sticky top-0 z-20 shadow-md">
+                <table id="dataTable" class="w-full text-left border-collapse table-fixed">
+                    <thead id="tableHead" class="text-xs uppercase tracking-wider shadow-md">
                     </thead>
                     <tbody id="tableBody" class="divide-y divide-gray-700 divide-opacity-40 text-sm text-gray-300">
                     </tbody>
@@ -47,10 +76,10 @@
             </div>
         </div>
 
-        <!-- Alt Bilgi / Footer (Sabit) -->
+        <!-- Alt Bilgi / Footer -->
         <div class="flex-shrink-0 flex justify-between items-center mt-3 text-xs text-gray-400 px-2">
             <span>Toplam Kayıt: <span id="rowCount" class="font-semibold text-red-500">0</span></span>
-            <button onclick="refreshData()" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded-md transition-colors font-medium shadow-sm text-[11px]">
+            <button onclick="refreshData()" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded-md transition-colors font-medium shadow-sm text-xs">
                 Verileri Temizle
             </button>
         </div>
@@ -85,7 +114,7 @@
             try {
                 const response = await fetch(CSV_FILE_URL);
                 if (!response.ok) throw new Error('CSV dosyası sunucudan alınamadı.');
-                
+
                 const csvText = await response.text();
                 localStorage.setItem(CACHE_KEY, csvText);
                 processData(csvText);
@@ -99,7 +128,7 @@
 
         function processData(csvText) {
             const rawData = parseCSV(csvText);
-            
+
             if (Array.isArray(rawData) && rawData.length > 0) {
                 headers = rawData[0];
                 allData = rawData.slice(1).map(row => {
@@ -109,7 +138,7 @@
                     });
                     return obj;
                 });
-                
+
                 renderTable(allData);
             } else {
                 document.getElementById('loading').classList.add('hidden');
@@ -146,17 +175,17 @@
 
             let headHtml = '<tr>';
             headers.forEach(header => {
-                headHtml += `<th class="px-3 py-4 font-semibold truncate bg-gray-950 text-gray-200">${header}</th>`;
+                headHtml += `<th class="px-3 py-4 font-semibold truncate">${header}</th>`;
             });
             headHtml += '</tr>';
             tHead.innerHTML = headHtml;
 
             let bodyHtml = '';
             data.forEach((row) => {
-                bodyHtml += `<tr class="hover:bg-gray-800 hover:bg-opacity-40 transition-colors bg-transparent">`;
+                bodyHtml += `<tr class="hover:bg-gray-800 hover:bg-opacity-40 transition-colors">`;
                 headers.forEach(header => {
                     let cellValue = row[header] !== undefined ? row[header] : '';
-                    
+
                     if (header.toLowerCase().includes('cmm') && cellValue) {
                         bodyHtml += `<td class="px-3 py-4 text-gray-300 whitespace-nowrap truncate">
                                         <a href="https://ttdocs.thyteknik.com/documents/?q:document_chapter:icontains=${cellValue}" target="_blank" class="text-red-400 hover:text-red-300 underline font-medium">
@@ -180,7 +209,7 @@
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
             const filtered = allData.filter(row => {
-                return Object.values(row).some(val => 
+                return Object.values(row).some(val =>
                     String(val).toLowerCase().includes(term)
                 );
             });
