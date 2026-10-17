@@ -155,4 +155,36 @@
                     let cellValue = row[header] !== undefined ? row[header] : '';
                     
                     if (header.toLowerCase().includes('cmm') && cellValue) {
-                        bodyHtml += `<td class="px-3 py-4 text-gray-
+                        bodyHtml += `<td class="px-3 py-4 text-gray-300 whitespace-nowrap truncate">
+                                        <a href="https://ttdocs.thyteknik.com/documents/?q:document_chapter:icontains=${cellValue}" target="_blank" class="text-red-400 hover:text-red-300 underline font-medium">
+                                            ${cellValue}
+                                        </a>
+                                     </td>`;
+                    } else {
+                        bodyHtml += `<td class="px-3 py-4 text-gray-300 whitespace-nowrap truncate">${cellValue}</td>`;
+                    }
+                });
+                bodyHtml += '</tr>';
+            });
+            tBody.innerHTML = bodyHtml;
+
+            document.getElementById('rowCount').textContent = data.length;
+
+            loading.classList.add('hidden');
+            tableContainer.classList.remove('hidden');
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allData.filter(row => {
+                return Object.values(row).some(val => 
+                    String(val).toLowerCase().includes(term)
+                );
+            });
+            renderTable(filtered);
+        });
+
+        loadData();
+    </script>
+</body>
+</html>
