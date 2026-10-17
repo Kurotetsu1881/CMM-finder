@@ -4,21 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CMM Finder</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="bg-[url('background.jpg')] bg-cover bg-center bg-no-repeat bg-fixed text-gray-100 min-h-screen p-6 flex flex-col">
-    <div class="max-w-7xl mx-auto w-full flex flex-col flex-grow"> 
-        <!-- Üst Arama ve Başlık Barı -->
-        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-gray-900/10 p-6 rounded-2xl shadow-xl border border-gray-700/5 backdrop-blur-sm">
+<body class="bg-gray-900 bg-cover bg-center bg-no-repeat bg-fixed text-gray-100 h-screen p-6 flex flex-col overflow-hidden" style="background-image: url('background.jpg');">
+    <div class="max-w-7xl mx-auto w-full flex flex-col h-full"> 
+        
+        <!-- Üst Arama ve Başlık Barı (Sabit ve Şeffaf) -->
+        <div class="flex-shrink-0 flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-gray-900 bg-opacity-40 p-6 rounded-2xl shadow-xl border border-gray-700 border-opacity-30 backdrop-blur-sm">
             <div>
                 <h1 class="text-2xl font-bold text-red-500 tracking-wide">CMM Erişim Ekranı</h1>
             </div>
             <div class="w-full md:w-72">
-                <input type="text" id="searchInput" placeholder="Tabloda ara..." class="w-full bg-gray-950/40 border border-gray-700/30 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-red-500 transition-colors backdrop-blur-sm">
+                <input type="text" id="searchInput" placeholder="Tabloda ara..." class="w-full bg-gray-950 bg-opacity-40 border border-gray-700 border-opacity-30 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-red-500 transition-colors backdrop-blur-sm">
             </div>
         </div>
 
@@ -29,30 +30,31 @@
         </div>
 
         <!-- Hata Mesajı -->
-        <div id="errorMessage" class="hidden bg-red-900/50 border border-red-500 text-red-200 px-6 py-4 rounded-xl flex items-center shadow-lg">
+        <div id="errorMessage" class="hidden flex-shrink-0 bg-red-900 bg-opacity-50 border border-red-500 text-red-200 px-6 py-4 rounded-xl flex items-center shadow-lg mb-4">
             <svg class="w-6 h-6 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.667.192 3 1.732 3z"></path></svg>
             <span id="errorText"></span>
         </div>
 
-        <!-- Tablo Kapsayıcısı (Sayfa boyunca esneyen dinamik alan) -->
-        <div id="tableContainer" class="hidden flex flex-col flex-grow bg-gray-950/10 rounded-2xl border border-gray-700/5 shadow-xl overflow-hidden backdrop-blur-sm min-h-[400px]">
-            <div class="overflow-y-scroll flex-grow relative">
+        <!-- Tablo Kapsayıcısı (Başlığın Altında Kayan Alan) -->
+        <div id="tableContainer" class="hidden flex-grow flex flex-col min-h-0 bg-gray-950 bg-opacity-30 rounded-2xl border border-gray-700 border-opacity-30 shadow-xl overflow-hidden backdrop-blur-sm">
+            <div class="overflow-y-auto flex-grow relative">
                 <table id="dataTable" class="w-full text-left border-collapse table-fixed border-spacing-0">
                     <thead id="tableHead" class="bg-gray-950 text-gray-300 text-xs uppercase tracking-wider sticky top-0 z-20 shadow-md">
                     </thead>
-                    <tbody id="tableBody" class="divide-y divide-gray-700/5 text-sm text-gray-300">
+                    <tbody id="tableBody" class="divide-y divide-gray-700 divide-opacity-30 text-sm text-gray-300">
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Alt Bilgi / Footer -->
-        <div class="flex justify-between items-center mt-6 text-xs text-gray-400 px-2">
+        <!-- Alt Bilgi / Footer (Sabit) -->
+        <div class="flex-shrink-0 flex justify-between items-center mt-4 text-xs text-gray-400 px-2">
             <span>Toplam Kayıt: <span id="rowCount" class="font-semibold text-red-500">0</span></span>
             <button onclick="refreshData()" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded-md transition-colors font-medium shadow-sm text-[11px]">
                 Verileri Temizle
             </button>
         </div>
+
     </div>
 
     <script>
@@ -111,7 +113,8 @@
                 renderTable(allData);
             } else {
                 document.getElementById('loading').classList.add('hidden');
-                throw new Error('Tabloda görüntülenecek veri bulunamadı.');
+                document.getElementById('errorMessage').classList.remove('hidden');
+                document.getElementById('errorText').textContent = 'Tabloda görüntülenecek veri bulunamadı.';
             }
         }
 
@@ -143,14 +146,14 @@
 
             let headHtml = '<tr>';
             headers.forEach(header => {
-                headHtml += `<th class="px-3 py-4 font-semibold truncate">${header}</th>`;
+                headHtml += `<th class="px-3 py-4 font-semibold truncate bg-gray-950 text-gray-200">${header}</th>`;
             });
             headHtml += '</tr>';
             tHead.innerHTML = headHtml;
 
             let bodyHtml = '';
-            data.forEach((row, index) => {
-                bodyHtml += `<tr class="hover:bg-gray-800/20 transition-colors bg-transparent">`;
+            data.forEach((row) => {
+                bodyHtml += `<tr class="hover:bg-gray-800 hover:bg-opacity-30 transition-colors bg-transparent">`;
                 headers.forEach(header => {
                     let cellValue = row[header] !== undefined ? row[header] : '';
                     
