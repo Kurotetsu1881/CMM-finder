@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilgi Ekle / Düzelt - CMM Finder</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(17, 24, 39, 0.8); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body class="bg-gray-900 bg-cover bg-center bg-no-repeat bg-fixed text-gray-100 min-h-screen p-4 sm:p-8 flex flex-col justify-center items-center" style="background-image: url('background.jpg');">
+    <div class="max-w-xl w-full glass p-6 sm:p-8 rounded-2xl shadow-2xl border border-gray-700 border-opacity-50">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-xl sm:text-2xl font-bold text-red-500">Bilgi Ekle / Düzelt Bildirimi</h1>
+            <a href="index.html" class="text-xs text-gray-400 hover:text-white underline">← Ana Ekrana Dön</a>
+        </div>
+
+        <form id="reportForm" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Bildirim Türü</label>
+                <select id="tur" class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-red-500">
+                    <option value="Hatalı bilgi">Hatalı Bilgi Bildirimi</option>
+                    <option value="Yeni ekleme">Yeni CMM / Parça Ekleme</option>
+                    <option value="Diğer">Diğer</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Uçak Tipi</label>
+                    <input type="text" id="tip" class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-red-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Kuyruk Kodu</label>
+                    <input type="text" id="kuyruk" class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-red-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Lokasyon</label>
+                    <input type="text" id="lokasyon" class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-red-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">P/N</label>
+                    <input type="text" id="pn" class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-red-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">CMM</label>
+                    <input type="text" id="cmm" class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-red-500">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Açıklama / Doğru Bilgi</label>
+                <textarea id="aciklama" rows="3" placeholder="Lütfen detayları belirtin..." class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-red-500"></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-xl transition-colors shadow-lg">
+                Bildirimi Gönder
+            </button>
+            <p id="msg" class="text-center text-sm mt-2" hidden></p>
+        </form>
+    </div>
+
+    <script>
+        // Google Apps Script Web App URL adresinizi buraya tırnak içinde yazın:
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHHguLxkdy-ctSQD1d5mxVkPqvb7e7gMYPw794pEPIFRVdH_VGI8FXuzOQaA7--BeRCA/exec";
+
+        // URL'den gelen verileri otomatik form alanlarına doldur
+        const params = new URLSearchParams(window.location.search);
+        ['tur', 'tip', 'kuyruk', 'lokasyon', 'pn', 'cmm'].forEach(k => {
+            if (params.has(k) && document.getElementById(k)) {
+                document.getElementById(k).value = params.get(k);
+            }
+        });
+
+        document.getElementById('reportForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const msg = document.getElementById('msg');
+            
+            if (SCRIPT_URL.includes("BURAYA")) {
+                alert("Lütfen script URL adresini yapılandırın.");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = "Gönderiliyor...";
+            msg.hidden = true;
+
+            const payload = {
+                tur: document.getElementById('tur').value,
+                tip: document.getElementById('tip').value,
+                kuyruk: document.getElementById('kuyruk').value,
+                lokasyon: document.getElementById('lokasyon').value,
+                pn: document.getElementById('pn').value,
+                cmm: document.getElementById('cmm').value,
+                aciklama: document.getElementById('aciklama').value
+            };
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                msg.textContent = "Bildiriminiz başarıyla iletildi. Teşekkürler!";
+                msg.className = "text-center text-sm mt-2 text-green-400 font-medium";
+                msg.hidden = false;
+                document.getElementById('reportForm').reset();
+            } catch (err) {
+                msg.textContent = "Gönderim sırasında bir hata oluştu.";
+                msg.className = "text-center text-sm mt-2 text-red-400 font-medium";
+                msg.hidden = false;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Bildirimi Gönder";
+            }
+        });
+    </script>
+</body>
+</html>
