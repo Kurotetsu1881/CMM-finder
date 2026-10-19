@@ -2,15 +2,19 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
     <title>CMM Finder</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
+        [hidden] { display: none !important; }
 
-        /* Üst başlık barı */
-        .top-bar {
+        /* Cam görünümlü paneller */
+        .glass {
             background: rgba(17, 24, 39, 0.5);
             -webkit-backdrop-filter: blur(8px);
             backdrop-filter: blur(8px);
@@ -18,18 +22,71 @@
 
         /* Arama kutusu */
         .search-box {
-            background: rgba(3, 7, 18, 0.5);
+            width: 100%;
+            height: 48px;
+            padding: 0 44px 0 16px;
+            font-size: 17px;
+            letter-spacing: 0.04em;
             color: #ffffff;
             -webkit-text-fill-color: #ffffff;
+            text-transform: uppercase;
+            background: rgba(3, 7, 18, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            border-radius: 12px;
         }
-        .search-box::placeholder { color: #9ca3af; }
+        .search-box::placeholder { color: #9ca3af; text-transform: none; letter-spacing: 0; }
+        .search-box:focus { outline: none; border-color: #ef4444; }
+        #inputWrap { position: relative; width: 100%; }
+        #clearBtn {
+            position: absolute; right: 2px; top: 2px;
+            width: 44px; height: 44px;
+            font-size: 26px; line-height: 1;
+            color: #cbd5e1; background: transparent; border: 0; cursor: pointer;
+        }
+        #clearBtn:hover { color: #ffffff; }
 
-        /* Tablo bölümü çerçevesi */
-        .table-wrap {
+        /* Açılış ekranı: sadece arama kutusu görünür */
+        #searchSection.hero { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; min-height: 0; }
+        #searchSection.hero #searchPanel {
+            width: 100%; max-width: 720px;
+            padding: 32px 24px; border-radius: 20px;
+            text-align: center;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+        }
+        #searchSection.hero #inputWrap { max-width: 600px; margin: 22px auto 0; }
+        #searchSection.hero .search-box { height: 60px; font-size: 21px; border: 2px solid #ef4444; border-radius: 16px; }
+
+        /* Sonuç ekranı: arama kutusu küçülüp üste çıkar */
+        #searchSection:not(.hero) { flex: 0 0 auto; margin-bottom: 12px; }
+        #searchSection:not(.hero) #searchPanel {
+            display: flex; flex-wrap: wrap; align-items: center;
+            gap: 12px 20px; padding: 12px 16px; border-radius: 16px;
             border: 1px solid rgba(55, 65, 81, 0.5);
         }
+        #searchSection:not(.hero) #inputWrap { max-width: 380px; }
 
-        /* Sabit başlık satırı: üst bar ile aynı renk ve şeffaflık */
+        .chip {
+            display: inline-flex; align-items: center;
+            min-height: 40px; padding: 0 16px;
+            font-size: 14px; font-weight: 600; color: #e5e7eb;
+            background: rgba(8, 20, 40, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            border-radius: 9999px; cursor: pointer;
+        }
+        .chip:hover { border-color: #ef4444; }
+
+        .btn-ghost {
+            display: inline-flex; align-items: center;
+            min-height: 44px; padding: 0 16px;
+            font-size: 14px; font-weight: 600; color: #f1f5f9; text-decoration: none;
+            background: rgba(8, 20, 40, 0.4);
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            border-radius: 12px; cursor: pointer;
+        }
+        .btn-ghost:hover { border-color: #ef4444; }
+
+        /* Tablo */
+        .table-wrap { border: 1px solid rgba(55, 65, 81, 0.5); }
         .head-bar {
             background: rgba(17, 24, 39, 0.5);
             -webkit-backdrop-filter: blur(8px);
@@ -37,223 +94,312 @@
             border-bottom: 2px solid rgba(239, 68, 68, 0.6);
             color: #e5e7eb;
         }
+        .body-scroll { background: rgba(3, 7, 18, 0.7); }
 
-        /* Kayan liste */
-        .body-scroll {
-            background: rgba(3, 7, 18, 0.7);
+        .icon-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 40px; height: 40px; margin: -8px 0;
+            color: #9ca3af; background: none; border: 0; cursor: pointer;
+            vertical-align: middle;
+        }
+        .icon-btn:hover { color: #f87171; }
+        .icon-btn.copied { color: #34d399; }
+        .edit-txt { display: none; }
+
+        /* Telefon: tablo yerine kart görünümü */
+        @media (max-width: 640px) {
+            #headWrap { display: none; }
+            #dataTable, #dataTable tbody, #dataTable tr, #dataTable td { display: block; width: 100%; }
+            #dataTable tr { padding: 10px 12px; border-bottom: 1px solid rgba(75, 85, 99, 0.4); }
+            #dataTable td { padding: 3px 0 !important; white-space: normal !important; overflow: visible !important; text-overflow: clip !important; }
+            #dataTable td::before {
+                content: attr(data-label);
+                display: inline-block; min-width: 92px;
+                color: #9ca3af; font-size: 11px;
+                text-transform: uppercase; letter-spacing: 0.04em;
+            }
+            #dataTable td.cell-act::before { display: none; }
+            .edit-link { width: auto !important; padding: 0 4px; margin: 0 !important; height: 36px !important; }
+            .edit-txt { display: inline; margin-left: 6px; font-size: 13px; }
+            #searchSection.hero #searchPanel { padding: 24px 16px; }
         }
     </style>
 </head>
-<body class="bg-gray-900 bg-cover bg-center bg-no-repeat bg-fixed text-gray-100 h-screen p-6 flex flex-col overflow-hidden" style="background-image: url('background.jpg');">
+<body class="bg-gray-900 bg-cover bg-center bg-no-repeat bg-fixed text-gray-100 h-screen p-3 sm:p-6 flex flex-col overflow-hidden" style="background-image: url('background.jpg');">
     <div class="max-w-7xl mx-auto w-full flex flex-col h-full overflow-hidden">
 
-        <!-- Üst Arama ve Başlık Barı -->
-        <div class="top-bar flex-shrink-0 flex flex-col md:flex-row justify-between items-center mb-4 gap-4 p-5 rounded-2xl shadow-xl border border-gray-700 border-opacity-50">
-            <div>
-                <h1 class="text-2xl font-bold text-red-500 tracking-wide">CMM Erişim Ekranı</h1>
-            </div>
-            <div class="w-full md:w-72">
-                <input type="text" id="searchInput" placeholder="Tabloda ara..." class="search-box w-full border border-gray-700 rounded-xl px-4 py-2.5 focus:outline-none focus:border-red-500 transition-colors">
+        <!-- Üst bar -->
+        <div class="glass flex-shrink-0 flex items-center justify-between gap-4 mb-3 p-4 sm:p-5 rounded-2xl shadow-xl border border-gray-700 border-opacity-50">
+            <h1 class="text-xl sm:text-2xl font-bold text-red-500 tracking-wide">CMM Erişim Ekranı</h1>
+            <a href="bilgi-ekle.html" class="btn-ghost">Bilgi ekle / düzelt</a>
+        </div>
+
+        <!-- Arama bölümü -->
+        <div id="searchSection" class="hero">
+            <div id="searchPanel" class="glass">
+                <div id="heroText">
+                    <h2 class="text-2xl sm:text-4xl font-bold">Uçağın kuyruk kodunu yazın</h2>
+                    <p class="mt-2 text-gray-300 text-sm sm:text-lg">Lokasyon, P/N ve CMM numarası tek aramada listelenir.</p>
+                </div>
+                <div id="inputWrap">
+                    <input type="text" id="searchInput" class="search-box" placeholder="Örn. TC-LGI" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Kuyruk kodu veya kelime ara">
+                    <button type="button" id="clearBtn" aria-label="Aramayı temizle" hidden>&times;</button>
+                </div>
+                <p id="status" class="mt-3 text-sm text-gray-300" aria-live="polite">Veriler yükleniyor...</p>
+                <div id="recent" class="mt-5 flex flex-wrap items-center justify-center gap-2" hidden>
+                    <span class="text-sm text-gray-300 mr-1">Son aranan</span>
+                    <span id="recentChips" class="flex flex-wrap justify-center gap-2"></span>
+                </div>
+                <div id="resultBar" class="flex flex-wrap items-center gap-x-4 text-sm text-gray-300" hidden aria-live="polite">
+                    <span><strong id="resultCount" class="text-red-400 text-lg">0</strong> sonuç</span>
+                    <span class="hidden sm:inline text-gray-400">Bir satırdaki bilgi yanlışsa sağındaki kalem simgesine tıklayın.</span>
+                </div>
             </div>
         </div>
 
-        <!-- Yükleniyor Göstergesi -->
-        <div id="loading" class="flex flex-col items-center justify-center py-20 flex-grow">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mb-4"></div>
-            <p class="text-gray-300 text-sm">Veriler yükleniyor, lütfen bekleyin...</p>
-        </div>
-
-        <!-- Hata Mesajı -->
-        <div id="errorMessage" class="hidden flex-shrink-0 bg-red-900 bg-opacity-80 border border-red-500 text-red-200 px-6 py-4 rounded-xl flex items-center shadow-lg mb-4">
+        <!-- Hata -->
+        <div id="errorMessage" class="flex-shrink-0 bg-red-900 bg-opacity-80 border border-red-500 text-red-200 px-6 py-4 rounded-xl flex items-center shadow-lg mb-4" role="alert" hidden>
             <svg class="w-6 h-6 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.667.192 3 1.732 3z"></path></svg>
             <span id="errorText"></span>
         </div>
 
-        <!-- Tablo Bölümü -->
-        <div id="tableContainer" class="table-wrap hidden flex-grow flex flex-col min-h-0 rounded-2xl shadow-xl overflow-hidden">
+        <!-- Sonuç yok -->
+        <div id="emptyState" class="glass flex-shrink-0 p-8 rounded-2xl border border-gray-700 border-opacity-50 text-center text-gray-200 text-sm" hidden></div>
 
-            <!-- Sabit başlık satırı (kayan alanın dışında) -->
-            <div id="headBar" class="head-bar flex-shrink-0">
+        <!-- Tablo -->
+        <div id="tableContainer" class="table-wrap flex-grow flex flex-col min-h-0 rounded-2xl shadow-xl overflow-hidden" hidden>
+            <div id="headWrap" class="head-bar flex-shrink-0">
                 <table class="w-full text-left border-collapse table-fixed">
-                    <thead id="tableHead" class="text-xs uppercase tracking-wider">
-                    </thead>
+                    <colgroup id="colsHead"></colgroup>
+                    <thead id="tableHead" class="text-xs uppercase tracking-wider"></thead>
                 </table>
             </div>
-
-            <!-- Kayan liste -->
             <div id="bodyScroll" class="body-scroll overflow-y-auto flex-grow min-h-0">
                 <table id="dataTable" class="w-full text-left border-collapse table-fixed">
-                    <tbody id="tableBody" class="divide-y divide-gray-700 divide-opacity-40 text-sm text-gray-300">
-                    </tbody>
+                    <colgroup id="colsBody"></colgroup>
+                    <tbody id="tableBody" class="divide-y divide-gray-700 divide-opacity-40 text-sm text-gray-300"></tbody>
                 </table>
+                <div id="moreWrap" class="p-3 text-center" hidden>
+                    <button type="button" id="moreBtn" class="btn-ghost text-xs"></button>
+                </div>
             </div>
         </div>
 
-        <!-- Alt Bilgi / Footer -->
-        <div class="flex-shrink-0 flex justify-between items-center mt-3 text-xs text-gray-400 px-2">
-            <span>Toplam Kayıt: <span id="rowCount" class="font-semibold text-red-500">0</span></span>
-            <button onclick="refreshData()" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded-md transition-colors font-medium shadow-sm text-xs">
-                Verileri Temizle
-            </button>
+        <!-- Alt bilgi -->
+        <div class="flex-shrink-0 mt-3 text-xs text-gray-400 px-2">
+            <span>Toplam kayıt: <span id="totalCount" class="font-semibold text-red-500">0</span></span>
         </div>
-
     </div>
 
     <script>
         const CSV_FILE_URL = "veri.csv";
         const CACHE_KEY = "cmm_finder_data";
+        const RECENT_KEY = "cmm_recent";
+        const PAGE_SIZE = 200;
+        const MIN_CHARS = 2;
+        const REPORT_PAGE = "bilgi-ekle.html";
+        const REPORT_KEYS = ["tip", "kuyruk", "lokasyon", "pn", "cmm"];
+
+        const COPY_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+        const EDIT_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>';
+
         let allData = [];
         let headers = [];
+        let filtered = [];
+        let terms = [];
+        let recent = [];
+        let loaded = false;
+        let shownCount = PAGE_SIZE;
+        let searchTimer = null;
+        let lastKey = null;
 
-        // Sayfa açılışı: önbellek varsa hemen göster, arkadan taze veriyi kontrol et
-        async function loadData() {
-            const loading = document.getElementById('loading');
-            const tableContainer = document.getElementById('tableContainer');
-            const errorMessage = document.getElementById('errorMessage');
+        const $ = id => document.getElementById(id);
 
-            errorMessage.classList.add('hidden');
+        // ---------- Yardımcılar ----------
+        function esc(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
 
-            let cachedData = null;
-            try { cachedData = localStorage.getItem(CACHE_KEY); } catch (e) {}
+        // Türkçe İ/ı karışıklığını önler, büyük/küçük harf duyarsız arama sağlar
+        function norm(s) {
+            return String(s).replace(/İ/g, 'I').replace(/ı/g, 'I').toUpperCase();
+        }
 
-            if (cachedData) {
-                // Hızlı açılış: eski veriyi hemen göster
-                processData(cachedData);
-                // Arka planda taze veriyi çek, farklıysa tabloyu güncelle
-                fetchAndCacheData(cachedData, true);
+        // Tırnaklı alanları da doğru okuyan CSV ayrıştırıcı
+        function parseCSV(text) {
+            const rows = [];
+            let row = [], field = '', inQ = false;
+            text = text.replace(/^﻿/, '');
+            for (let i = 0; i < text.length; i++) {
+                const c = text[i];
+                if (inQ) {
+                    if (c === '"') {
+                        if (text[i + 1] === '"') { field += '"'; i++; } else { inQ = false; }
+                    } else { field += c; }
+                } else if (c === '"' && field === '') {
+                    inQ = true;
+                } else if (c === ',') {
+                    row.push(field.trim()); field = '';
+                } else if (c === '\n' || c === '\r') {
+                    if (c === '\r' && text[i + 1] === '\n') i++;
+                    row.push(field.trim()); field = '';
+                    if (row.some(f => f !== '')) rows.push(row);
+                    row = [];
+                } else {
+                    field += c;
+                }
+            }
+            row.push(field.trim());
+            if (row.some(f => f !== '')) rows.push(row);
+            return rows;
+        }
+
+        // Satırdaki bilgiyi bilgi-ekle sayfasına hazır doldurulmuş olarak taşır
+        function reportUrl(cells) {
+            const p = new URLSearchParams();
+            p.set('tur', 'Hatalı bilgi');
+            REPORT_KEYS.forEach((k, i) => { if (cells[i]) p.set(k, cells[i]); });
+            return REPORT_PAGE + '?' + p.toString();
+        }
+
+        function showError(msg) {
+            $('errorText').textContent = msg;
+            $('errorMessage').hidden = false;
+            $('status').textContent = 'Veriler yüklenemedi.';
+        }
+
+        // ---------- Veri yükleme (önce önbellek, arkadan taze veri) ----------
+        function loadData() {
+            let cached = null;
+            try { cached = localStorage.getItem(CACHE_KEY); } catch (e) {}
+            if (cached) {
+                processData(cached);
+                fetchAndCacheData(cached, true);
             } else {
-                loading.classList.remove('hidden');
-                tableContainer.classList.add('hidden');
                 fetchAndCacheData(null, false);
             }
         }
 
         async function fetchAndCacheData(previousText, silent) {
             try {
-                // no-store: tarayıcının kendi HTTP önbelleğini atla, dosyayı gerçekten sunucudan al
+                // no-store: tarayıcının HTTP önbelleğini atla, dosyayı gerçekten sunucudan al
                 const response = await fetch(CSV_FILE_URL, { cache: 'no-store' });
                 if (!response.ok) throw new Error('CSV dosyası sunucudan alınamadı.');
-
                 const csvText = await response.text();
-
                 if (csvText !== previousText) {
                     try { localStorage.setItem(CACHE_KEY, csvText); } catch (e) {}
                     processData(csvText);
                 }
             } catch (error) {
-                // Sessiz modda (önbellek zaten gösteriliyor) hata göstermeyiz
-                if (!silent) {
-                    document.getElementById('loading').classList.add('hidden');
-                    document.getElementById('errorMessage').classList.remove('hidden');
-                    document.getElementById('errorText').textContent = "Hata: " + error.message;
-                }
+                if (!silent) showError('Hata: ' + error.message);
             }
         }
 
         function processData(csvText) {
-            const rawData = parseCSV(csvText);
+            const rows = parseCSV(csvText);
+            if (!rows.length) { showError('Tabloda görüntülenecek veri bulunamadı.'); return; }
+            headers = rows[0];
+            allData = rows.slice(1).map(cells => {
+                const c = headers.map((_, i) => cells[i] !== undefined ? cells[i] : '');
+                return { cells: c, search: norm(c.join(' ')) };
+            });
+            loaded = true;
+            $('errorMessage').hidden = true;
+            $('totalCount').textContent = allData.length.toLocaleString('tr-TR');
+            $('status').textContent = allData.length.toLocaleString('tr-TR') + ' kayıt hazır';
+            update(true);
+        }
 
-            if (Array.isArray(rawData) && rawData.length > 0) {
-                headers = rawData[0];
-                allData = rawData.slice(1).map(row => {
-                    let obj = {};
-                    headers.forEach((h, i) => {
-                        obj[h] = row[i] !== undefined ? row[i] : '';
-                    });
-                    return obj;
-                });
+        // ---------- Son aranan ----------
+        function loadRecent() {
+            try {
+                const r = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+                if (Array.isArray(r)) recent = r.filter(x => typeof x === 'string' && x.length <= 40).slice(0, 5);
+            } catch (e) { recent = []; }
+        }
 
-                applyFilter();
-            } else {
-                document.getElementById('loading').classList.add('hidden');
-                document.getElementById('errorMessage').classList.remove('hidden');
-                document.getElementById('errorText').textContent = 'Tabloda görüntülenecek veri bulunamadı.';
+        function saveRecent() {
+            const q = $('searchInput').value.trim().toUpperCase();
+            if (!loaded || !filtered.length || q.replace(/\s+/g, '').length < MIN_CHARS) return;
+            recent = [q].concat(recent.filter(x => x !== q)).slice(0, 5);
+            try { localStorage.setItem(RECENT_KEY, JSON.stringify(recent)); } catch (e) {}
+        }
+
+        function renderRecent() {
+            $('recentChips').innerHTML = recent.map(q =>
+                '<button type="button" class="chip" data-q="' + esc(q) + '">' + esc(q) + '</button>'
+            ).join('');
+        }
+
+        // ---------- Arama ve çizim ----------
+        // force=false iken arama metni değişmediyse tabloyu yeniden çizmez (tıklamalar kaybolmasın)
+        function update(force) {
+            const input = $('searchInput');
+            terms = norm(input.value).split(/\s+/).filter(Boolean);
+            const active = terms.join('').length >= MIN_CHARS;
+
+            $('clearBtn').hidden = !input.value;
+            $('searchSection').classList.toggle('hero', !active);
+            $('heroText').hidden = active;
+            $('status').hidden = active;
+            $('resultBar').hidden = !active;
+
+            if (!active) {
+                $('recent').hidden = !recent.length;
+                renderRecent();
+                $('tableContainer').hidden = true;
+                $('emptyState').hidden = true;
+                lastKey = null;
+                return;
             }
-        }
+            $('recent').hidden = true;
 
-        // Verileri Temizle butonu: önbelleği sil, taze veriyi çek
-        function refreshData() {
-            try { localStorage.removeItem(CACHE_KEY); } catch (e) {}
-            document.getElementById('searchInput').value = '';
-            fetchAndCacheData(null, false);
-        }
-
-        function parseCSV(text) {
-            let lines = text.split('\n');
-            let result = [];
-            for (let i = 0; i < lines.length; i++) {
-                let line = lines[i].trim();
-                if (line) {
-                    let row = line.split(',').map(item => item.replace(/^["']|["']$/g, '').trim());
-                    result.push(row);
-                }
+            if (!loaded) {
+                $('resultCount').textContent = '...';
+                $('tableContainer').hidden = true;
+                return;
             }
-            return result;
+
+            const key = terms.join(' ');
+            if (!force && key === lastKey) return;
+            lastKey = key;
+
+            filtered = allData.filter(r => terms.every(t => r.search.includes(t)));
+            shownCount = PAGE_SIZE;
+            renderTable();
         }
 
-        // Kaydırma çubuğu genişliği kadar başlığa sağ boşluk ver, sütunlar hizalı kalsın
+        // Kaydırma çubuğu genişliği kadar başlığa boşluk ver, sütunlar hizalı kalsın
         function syncHeadWidth() {
-            const scroller = document.getElementById('bodyScroll');
-            const headBar = document.getElementById('headBar');
-            const sbWidth = scroller.offsetWidth - scroller.clientWidth;
-            headBar.style.paddingRight = sbWidth + 'px';
+            const scroller = $('bodyScroll');
+            $('headWrap').style.paddingRight = (scroller.offsetWidth - scroller.clientWidth) + 'px';
         }
 
-        function renderTable(data) {
-            const tHead = document.getElementById('tableHead');
-            const tBody = document.getElementById('tableBody');
-            const loading = document.getElementById('loading');
-            const tableContainer = document.getElementById('tableContainer');
+        function rowHtml(row) {
+            let h = '<tr class="hover:bg-gray-800 hover:bg-opacity-40 transition-colors">';
+            row.cells.forEach((val, i) => {
+                const head = String(headers[i] || '').toLowerCase();
+                const label = esc(headers[i] || '');
+                const v = esc(val);
+                const tdOpen = '<td class="px-3 py-4 text-gray-300 whitespace-nowrap" data-label="' + label + '">';
 
-            let headHtml = '<tr>';
-            headers.forEach(header => {
-                headHtml += `<th class="px-3 py-4 font-semibold truncate">${header}</th>`;
+                if (head.includes('cmm') && val) {
+                    h += tdOpen + '<a href="https://ttdocs.thyteknik.com/documents/?q:document_chapter:icontains=' + encodeURIComponent(val) +
+                        '" target="_blank" rel="noopener noreferrer" class="text-red-400 hover:text-red-300 underline font-medium">' + v + '</a></td>';
+                } else if (head.includes('p/n') && val) {
+                    h += tdOpen + '<span class="inline-flex items-center max-w-full"><span class="truncate" title="' + v + '">' + v + '</span>' +
+                        '<button type="button" class="icon-btn" data-copy="' + v + '" title="Kopyala" aria-label="P/N kopyala">' + COPY_ICON + '</button></span></td>';
+                } else {
+                    h += tdOpen + '<span class="block truncate" title="' + v + '">' + v + '</span></td>';
+                }
             });
-            headHtml += '</tr>';
-            tHead.innerHTML = headHtml;
-
-            let bodyHtml = '';
-            data.forEach((row) => {
-                bodyHtml += `<tr class="hover:bg-gray-800 hover:bg-opacity-40 transition-colors">`;
-                headers.forEach(header => {
-                    let cellValue = row[header] !== undefined ? row[header] : '';
-
-                    if (header.toLowerCase().includes('cmm') && cellValue) {
-                        bodyHtml += `<td class="px-3 py-4 text-gray-300 whitespace-nowrap truncate">
-                                        <a href="https://ttdocs.thyteknik.com/documents/?q:document_chapter:icontains=${cellValue}" target="_blank" class="text-red-400 hover:text-red-300 underline font-medium">
-                                            ${cellValue}
-                                        </a>
-                                     </td>`;
-                    } else {
-                        bodyHtml += `<td class="px-3 py-4 text-gray-300 whitespace-nowrap truncate">${cellValue}</td>`;
-                    }
-                });
-                bodyHtml += '</tr>';
-            });
-            tBody.innerHTML = bodyHtml;
-
-            document.getElementById('rowCount').textContent = data.length;
-
-            loading.classList.add('hidden');
-            tableContainer.classList.remove('hidden');
-            syncHeadWidth();
+            h += '<td class="px-2 py-4 text-center cell-act"><a href="' + esc(reportUrl(row.cells)) + '" class="icon-btn edit-link" ' +
+                'title="Bu satırdaki bilgi hatalı veya eksikse bildir" aria-label="Bu satırdaki bilgi hatalı veya eksikse bildir">' +
+                EDIT_ICON + '<span class="edit-txt">Hatalı / eksik bildir</span></a></td>';
+            return h + '</tr>';
         }
 
-        // Aramadaki mevcut metne göre filtrele (taze veri gelince arama kaybolmaz)
-        function applyFilter() {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allData.filter(row => {
-                return Object.values(row).some(val =>
-                    String(val).toLowerCase().includes(term)
-                );
-            });
-            renderTable(filtered);
-        }
-
-        document.getElementById('searchInput').addEventListener('input', applyFilter);
-        window.addEventListener('resize', syncHeadWidth);
-
-        loadData();
-    </script>
-</body>
-</html>
+        function renderTable() {
+            const visible = filtered.slice(0, shownCount);
+            $('resultCount').te
