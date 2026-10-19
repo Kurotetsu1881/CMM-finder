@@ -8,7 +8,15 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(17, 24, 39, 0.8); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+        .glass { background: rgba(17, 24, 39, 0.85); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+        /* Form elemanlarının yazı renklerinin ve arka planının net görünmesi için */
+        input, select, textarea {
+            color: #ffffff !important;
+            background-color: rgba(3, 7, 18, 0.9) !important;
+        }
+        input::placeholder, textarea::placeholder {
+            color: #9ca3af !important;
+        }
     </style>
 </head>
 <body class="bg-gray-900 bg-cover bg-center bg-no-repeat bg-fixed text-gray-100 min-h-screen p-4 sm:p-8 flex flex-col justify-center items-center" style="background-image: url('background.jpg');">
@@ -21,7 +29,7 @@
         <form id="reportForm" class="space-y-4">
             <div>
                 <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Bildirim Türü</label>
-                <select id="tur" class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-red-500">
+                <select id="tur" class="w-full border border-gray-700 rounded-xl px-4 py-2.5 focus:outline-none focus:border-red-500">
                     <option value="Hatalı bilgi">Hatalı Bilgi Bildirimi</option>
                     <option value="Yeni ekleme">Yeni CMM / Parça Ekleme</option>
                     <option value="Diğer">Diğer</option>
@@ -31,32 +39,32 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Uçak Tipi</label>
-                    <input type="text" id="tip" class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-red-500">
+                    <input type="text" id="tip" class="w-full border border-gray-700 rounded-xl px-4 py-2 focus:outline-none focus:border-red-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Kuyruk Kodu</label>
-                    <input type="text" id="kuyruk" class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-red-500">
+                    <input type="text" id="kuyruk" class="w-full border border-gray-700 rounded-xl px-4 py-2 focus:outline-none focus:border-red-500">
                 </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Lokasyon</label>
-                    <input type="text" id="lokasyon" class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-red-500">
+                    <input type="text" id="lokasyon" class="w-full border border-gray-700 rounded-xl px-4 py-2 focus:outline-none focus:border-red-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">P/N</label>
-                    <input type="text" id="pn" class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-red-500">
+                    <input type="text" id="pn" class="w-full border border-gray-700 rounded-xl px-4 py-2 focus:outline-none focus:border-red-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">CMM</label>
-                    <input type="text" id="cmm" class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-red-500">
+                    <input type="text" id="cmm" class="w-full border border-gray-700 rounded-xl px-4 py-2 focus:outline-none focus:border-red-500">
                 </div>
             </div>
 
             <div>
                 <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">Açıklama / Doğru Bilgi</label>
-                <textarea id="aciklama" rows="3" placeholder="Lütfen detayları belirtin..." class="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-red-500"></textarea>
+                <textarea id="aciklama" rows="3" placeholder="Lütfen detayları belirtin..." class="w-full border border-gray-700 rounded-xl px-4 py-2.5 focus:outline-none focus:border-red-500"></textarea>
             </div>
 
             <button type="submit" id="submitBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-xl transition-colors shadow-lg">
@@ -67,10 +75,8 @@
     </div>
 
     <script>
-        // Google Apps Script Web App URL adresinizi buraya tırnak içinde yazın:
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHHguLxkdy-ctSQD1d5mxVkPqvb7e7gMYPw794pEPIFRVdH_VGI8FXuzOQaA7--BeRCA/exec";
+        const SCRIPT_URL = "BURAYA_APPS_SCRIPT_URL_ADRESINI_YAZIN";
 
-        // URL'den gelen verileri otomatik form alanlarına doldur
         const params = new URLSearchParams(window.location.search);
         ['tur', 'tip', 'kuyruk', 'lokasyon', 'pn', 'cmm'].forEach(k => {
             if (params.has(k) && document.getElementById(k)) {
