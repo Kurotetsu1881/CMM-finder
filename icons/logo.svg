@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="CMM Finder">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1f2937"/>
+      <stop offset="1" stop-color="#030712"/>
+    </linearGradient>
+    <linearGradient id="red" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f87171"/>
+      <stop offset="1" stop-color="#dc2626"/>
+    </linearGradient>
+    <radialGradient id="lens" cx="0.35" cy="0.3" r="0.9">
+      <stop offset="0" stop-color="#1e293b"/>
+      <stop offset="1" stop-color="#0b1220"/>
+    </radialGradient>
+    <g id="plane">
+      <path d="M0 -12 C1.8 -12 2.4 -9 2.4 -6 L2.4 -1.5 L13.5 6 L13.5 8.6 L2.4 5.2 L2.2 9.2 L6.2 12.2 L6.2 14 L0 12.2 L-6.2 14 L-6.2 12.2 L-2.2 9.2 L-2.4 5.2 L-13.5 8.6 L-13.5 6 L-2.4 -1.5 L-2.4 -6 C-2.4 -9 -1.8 -12 0 -12 Z"/>
+    </g>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect x="6" y="6" width="500" height="500" rx="106" fill="none" stroke="#ef4444" stroke-opacity="0.35" stroke-width="3"/>
+  <!-- sap -->
+  <line x1="332" y1="332" x2="424" y2="424" stroke="url(#red)" stroke-width="58" stroke-linecap="round"/>
+  <!-- mercek -->
+  <circle cx="234" cy="234" r="132" fill="url(#lens)"/>
+  <circle cx="234" cy="234" r="132" fill="none" stroke="url(#red)" stroke-width="36"/>
+  <!-- uçak -->
+  <use href="#plane" transform="translate(234 234) rotate(45) scale(7.2)" fill="#ffffff"/>
+</svg>
