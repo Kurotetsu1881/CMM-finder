@@ -397,7 +397,7 @@
             const figIns = ds.figs.map(f => /INSTL\s*$/.test(secs[f.ref.slice(0, 8)] || ''));   // "... - INSTL" bölümündeki figürler öncelikli
             // 1. geçiş: uçağa uygun satırlar
             if (!ds.insAll) ds.insAll = new Set(ds.figs.filter(f => /INSTL\s*$/.test(secs[f.ref.slice(0, 8)] || '')).map(f => f.ref.slice(0, 5)));
-            const strict = ds.meta.type === 'A330';   // A330: mutfak/lavabo bölümlerinde (25-3x, 25-4x) uçağa uygun INSTL (montaj) kaydı yoksa LAVATORY/GALLEY adlı fazla detay satırları gösterilmez (diğer parçalar kalır)
+            const strict = ds.meta.type === 'A330';   // A330: mutfak/lavabo bölümlerinde (25-3x, 25-4x) uçağa uygun INSTL (montaj) kaydı yoksa alt detay figürleri de gösterilmez (örn. A330 kargo uçaklarında yalnızca öndeki galley ve lavabo vardır)
             const cand = [], insSec = new Set();
             for (const r of ds.rows) {
                 const f = ds.figs[r[0]];
@@ -411,7 +411,7 @@
             const seen = new Map(), out = [];
             for (const r of cand) {
                 const f = ds.figs[r[0]], ek = /^ek-/.test(f.id);   // ek-… : veri.csv'den eklenen kayıtlar, her zaman gösterilir ve IPC kayıtlarıyla birleştirilmez
-                if (!ek && !figIns[r[0]] && (insSec.has(f.ref.slice(0, 5)) || (strict && /^25-[34]\d$/.test(f.ref.slice(0, 5)) && ds.insAll.has(f.ref.slice(0, 5)) && /^(LAVATORY|GALLEY)\b/i.test(r[4] || f.name)))) continue;
+                if (!ek && !figIns[r[0]] && (insSec.has(f.ref.slice(0, 5)) || (strict && /^25-[34]\d$/.test(f.ref.slice(0, 5)) && ds.insAll.has(f.ref.slice(0, 5))))) continue;
                 const key = f.ref.slice(0, 5) + '|' + (ek ? 'ek|' + r[4] + '|' : '') + r[2] + '|' + r[3] + '|' + r[8];   // aynı parça her ATA bölümünde ayrı listelenir (yoksa en küçük figür numaralı bölümde, örn. 11-32'de görünür, 25-40'ta kaybolur)
                 const hit = seen.get(key);
                 if (hit) {
