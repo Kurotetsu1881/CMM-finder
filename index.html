@@ -396,6 +396,8 @@
             const secs = ds.meta.sections || {};
             const figIns = ds.figs.map(f => /INSTL\s*$/.test(secs[f.ref.slice(0, 8)] || ''));   // "... - INSTL" bölümündeki figürler öncelikli
             // 1. geçiş: uçağa uygun satırlar
+            if (!ds.insAll) ds.insAll = new Set(ds.figs.filter(f => /INSTL\s*$/.test(secs[f.ref.slice(0, 8)] || '')).map(f => f.ref.slice(0, 5)));
+            const strict = ds.meta.type === 'A330';   // A330: mutfak/lavabo bölümlerinde (25-3x, 25-4x) uçağa uygun INSTL (montaj) kaydı yoksa alt detay figürleri de gösterilmez (örn. kargo uçaklarında lavabo/galley yok)
             const cand = [], insSec = new Set();
             for (const r of ds.rows) {
                 const f = ds.figs[r[0]];
@@ -409,7 +411,7 @@
             const seen = new Map(), out = [];
             for (const r of cand) {
                 const f = ds.figs[r[0]], ek = /^ek-/.test(f.id);   // ek-… : veri.csv'den eklenen kayıtlar, her zaman gösterilir ve IPC kayıtlarıyla birleştirilmez
-                if (!ek && !figIns[r[0]] && insSec.has(f.ref.slice(0, 5))) continue;
+                if (!ek && !figIns[r[0]] && (insSec.has(f.ref.slice(0, 5)) || (strict && /^25-[34]\d$/.test(f.ref.slice(0, 5)) && ds.insAll.has(f.ref.slice(0, 5))))) continue;
                 const key = f.ref.slice(0, 5) + '|' + (ek ? 'ek|' + r[4] + '|' : '') + r[2] + '|' + r[3] + '|' + r[8];   // aynı parça her ATA bölümünde ayrı listelenir (yoksa en küçük figür numaralı bölümde, örn. 11-32'de görünür, 25-40'ta kaybolur)
                 const hit = seen.get(key);
                 if (hit) {
@@ -421,6 +423,18 @@
                 seen.set(key, o); out.push(o);
             }
             out.forEach(o => { o.search = norm([o.pn, o.vendor, o.nom, o.fins.join(' '), o.cmm.map(fmtCmm).join(' ')].join(' ')); });
+            if (ds.lav) {   // A330 lavabo: kodsuz satıra, aynı harf+CMM için tek kalan kodu ver; aynı bölümde aynı ad + CMM'li tekrarları tek satıra indir
+                const used = new Set();
+                out.forEach(o => { const m = /^LAVATORY\s+([A-Z]{1,2})\b.*\((L\d+)\)/i.exec(o.nom); if (m) o.cmm.forEach(c => used.add(o.sec + '|' + m[1].toUpperCase() + '|' + c + '|' + m[2])); });
+                out.forEach(o => {
+                    const m = /^(LAVATORY\s+([A-Z]{1,2})\b[^()]*)$/i.exec(o.nom); if (!m) return;
+                    const L = m[2].toUpperCase(), left = new Set();
+                    o.cmm.forEach(c => ((ds.lav.lcs || {})[L + '|' + c] || []).forEach(k => { if (!used.has(o.sec + '|' + L + '|' + c + '|' + k)) left.add(k); }));
+                    if (left.size === 1) o.nom = m[1].trim() + ' (' + [...left][0] + ')';
+                });
+                const seenN = new Set();   // yalnızca kodlu (örn. (L36)) satırlar tekrar sayılır; kodsuz ikizler gerçek ayrı lavabo olabilir
+                for (let i = out.length - 1; i >= 0; i--) { const o = out[i]; if (!/^(LAVATORY|GALLEY)\s.*\(/i.test(o.nom) || !/^25-[34]\d$/.test(o.sec)) continue; const k = o.sec + '|' + o.nom + '|' + o.cmm.join(','); if (seenN.has(k)) out.splice(i, 1); else seenN.add(k); }
+            }
             S.base = out.filter(o => o.cmm.length);   // yalnızca CMM'i olan parçalar listelenir
         }
 
